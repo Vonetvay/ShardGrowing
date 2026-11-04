@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 45e75dff5d839a344a045b8832969202, type: 3}
+  m_Name: MaterialDatabase
+  m_EditorClassIdentifier: Assembly-CSharp::MaterialDatabase
+  materials:
+  - type: 0
+    materialName: "\u041F\u0440\u0438\u043C\u0435\u0441\u0438"
+    color: {r: 0.33820543, g: 0.3584906, b: 0.18770026, a: 1}
+    density: 1
+  - type: 1
+    materialName: "\u0421\u0438\u043D\u0438\u0439 \u043F\u043E\u0440\u043E\u0448\u043E\u043A"
+    color: {r: 0, g: 0.41259122, b: 1, a: 1}
+    density: 1
+  - type: 2
+    materialName: "\u0417\u0435\u043C\u043B\u044F\u043D\u0430\u044F \u0440\u0443\u0434\u0430"
+    color: {r: 0.6509434, g: 0.33548403, b: 0.11360805, a: 1}
+    density: 2

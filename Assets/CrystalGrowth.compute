@@ -1,0 +1,39 @@
+// Файл: Assets/Shaders/CrystalGrowth.hlsl
+#ifndef CRYSTAL_GROWTH_INCLUDED
+#define CRYSTAL_GROWTH_INCLUDED
+
+// Уникальная переменная роста, которая автоматически станет доступна во всех шейдерах
+float _Progress;
+
+// Полная входная структура данных из Меша. 
+// Эффекты не будут о ней знать, она скрыта здесь.
+struct CrystalAttributes
+{
+    float4 positionOS : POSITION;
+    float2 uv : TEXCOORD0;
+    float2 uv3 : TEXCOORD2;
+    float2 uv4 : TEXCOORD3;
+};
+
+// Выходная структура (мост между вертексом и фрагментом).
+// Сюда мы можем добавлять данные, нужные фрагментным эффектам.
+
+// Главная функция, которая инкапсулирует в себя всю вашу сложную логику
+float3 CalculateCrystalGrowth(CrystalAttributes v)
+{
+    float delay = v.uv3.x;
+    float duration = v.uv3.y;
+    float2 position = v.uv4;
+
+    // Математика роста
+    float t = saturate((_Progress - delay) / max(0.0001, duration));
+    
+    // Создаем копию позиции, чтобы изменить её xy координаты
+    float3 modifiedPos = v.positionOS.xyz;
+    modifiedPos.xy = lerp(position.xy, v.positionOS.xy, t);
+
+    // Возвращаем измененную позицию в локальных координатах объекта
+    return modifiedPos;
+}
+
+#endif

@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a75df687a4336d24d8a2cfe597f0fb52, type: 3}
+  m_Name: CrystalDatabase
+  m_EditorClassIdentifier: Assembly-CSharp::CrystalDatabase
+  crystals:
+  - crystalId: blue
+    crystalObject: {fileID: 2688466821582388792, guid: 29f5bde363920d342aa8c25465c8d803, type: 3}
+    quality: 1
+    composition:
+    - materialId: blue
+      minShare: 0.895
+      maxShare: 1
+  - crystalId: red
+    crystalObject: {fileID: 3372584849458481729, guid: ee0ea72a6bb6af54a9d4e85e15f2ed8f, type: 3}
+    quality: 1
+    composition:
+    - materialId: red
+      minShare: 0.895
+      maxShare: 1
