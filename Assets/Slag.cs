@@ -7,7 +7,7 @@ public class Slag : CrystalNew
     protected override ShardParams[] CrystalCalculator(ref float seed)
     {
         ShardParams[] shards = new ShardParams[1];
-        shards[0] = new ShardParams(float3.zero, float4x4.identity, 0f, 0f, 1f);
+        shards[0] = new ShardParams(float3.zero, float4x4.identity, float4x4.identity, 0f, 0f, 1f);
         return shards;
     }
 

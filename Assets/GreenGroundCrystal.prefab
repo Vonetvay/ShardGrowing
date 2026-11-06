@@ -102,6 +102,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 758623788ad34db4eb7fa0ed2a2ba54b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GreenGroundCrystal
+  _animationProgress: 0
+  _animationStep: 0.1
   vertexCount: 6
   _seed: 14.2
   _mass: 25

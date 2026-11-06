@@ -4,12 +4,18 @@ using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Rendering;
+using static UnityEngine.Rendering.DebugUI;
 
-public record ShardParams(float3 Position, float4x4 BaseMatrix, float ZOffset, float Delay, float Duration);
+public record ShardParams(float3 Position, float4x4 BaseMatrix, float4x4 TransformMatrix, float ZOffset, float Delay, float Duration);
 
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 public class CrystalNew : MonoBehaviour
 {
+    [Header("Настройка анимации")]
+    [SerializeField][Range(0f, 1f)] protected float _animationProgress;
+    [SerializeField] private float _animationStep = 0.1f;
+
+    [Header("Настройка кристалла")]
     [SerializeField] protected int vertexCount = 4;
     [SerializeField] private float _seed;
     [SerializeField] private float _mass;
@@ -17,6 +23,7 @@ public class CrystalNew : MonoBehaviour
 
     public void OnValidate()
     {
+        _animationProgress = Mathf.Round(_animationProgress / _animationStep) * _animationStep;
         GenerateCrystal(_seed, _mass);
     }
 
@@ -54,7 +61,7 @@ public class CrystalNew : MonoBehaviour
             NativeSlice<float2> uvSlice = new NativeSlice<float2>(uvs, i * vertexCount, vertexCount);
             //NativeSlice<float2> timeAttributesSlice = new NativeSlice<float2>(timeAttributes, i * vertexCount, vertexCount);
             //NativeSlice<float2> spaceOrientationSlice = new NativeSlice<float2>(timeAttributes, i * vertexCount, vertexCount);
-
+            
             //float zOffset = (count > 1) ? (float)i / (count - 1) : 0f;
 
             /*SetShardVertices(vertexSlice, i, shardsParams[i]);
@@ -64,6 +71,7 @@ public class CrystalNew : MonoBehaviour
             //SetShardOrientation(spaceOrientationSlice, i, shardsParams[i]);
 
             ShardCalculator(i, vertexCount, vertexSlice, triangleSlice, uvSlice, shardsParams[i]);
+            //ShardAnimate(_animationProgress, vertexSlice, shardsParams[i].Position, shardsParams[i].TransformMatrix);
 
             // Заполняем массив delay для текущего осколка
             /*for (int v = 0; v < vertexCount; v++)
@@ -77,29 +85,27 @@ public class CrystalNew : MonoBehaviour
         // Записываем данные НАПРЯМУЮ в Меш из нативной памяти
         mesh.SetVertices(vertices);
 
-        /*Bounds bounds = mesh.bounds;
+        Bounds bounds = mesh.bounds;
         float xSize = bounds.size.x;
         float ySize = bounds.size.y;
         float area = xSize * ySize;
 
         float3 offset = bounds.center;
 
-        float sizeCorrection = math.sqrt((mass / math.max(0.0001f, _density)) / math.max(0.0001f, area));
+        float sizeCorrection = mass / _density;//.sqrt((mass / math.max(0.0001f, _density)) / math.max(0.0001f, area));
 
-        Debug.Log(area);
-
-        for (int i = 0; i < totalVertices; i++) 
+        for (int i = 0; i < totalVertices; i++)
         {
-            float3 vertex = myVertices[i];
+            float3 vertex = vertices[i];
             vertex.x *= sizeCorrection;
             vertex.y *= sizeCorrection;
-            vertex.x -= offset.x;
-            vertex.y -= offset.y;
-            positionAttributes[i] -= new float2(offset.x, offset.y);
-            myVertices[i] = vertex;
+            //vertex.x -= offset.x;
+            //vertex.y -= offset.y;
+            //positionAttributes[i] -= new float2(offset.x, offset.y);
+            vertices[i] = vertex;
         }
 
-        mesh.SetVertices(myVertices);*/
+        mesh.SetVertices(vertices);
 
         mesh.SetIndexBufferParams(totalTriangles, IndexFormat.UInt32);
         mesh.SetIndexBufferData(triangles, 0, 0, totalTriangles, MeshUpdateFlags.DontValidateIndices);
@@ -139,6 +145,16 @@ public class CrystalNew : MonoBehaviour
     protected virtual void ShardCalculator(int index, int vertexCount, NativeSlice<float3> vertices, NativeSlice<int> triangles, NativeSlice<float2> uvs, ShardParams parameters)
     {
         
+    }
+
+    protected virtual void GlobalShardAnimate(float progress, NativeSlice<float3> vertices, float3 animationPivot, ShardParams parameters) 
+    {
+        
+    }
+
+    protected virtual void LocalShardAnimate(float progress, NativeSlice<float3> localVertices, float3 animationPivot, ShardParams parameters) 
+    {
+
     }
 
     protected virtual void SetShardVertices(NativeSlice<float3> vertices, int index, ShardParams parameters) 

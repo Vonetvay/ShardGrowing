@@ -102,10 +102,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ca0d9cc0f9fab4a47b06276407db7c21, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BlueCrystalNew
+  _animationProgress: 0
+  _animationStep: 0.1
   vertexCount: 5
   _seed: 20.3
   _mass: 150
   _density: 25
+  _startingAnimationWidth: 0.4
+  _startingAnimationConstantHeight: 0.2
+  _widthAnimationSpeedRatio: 0.6
   _widthRatioRange: {x: 0.2, y: 0.3}
   _heightCurve:
     serializedVersion: 2

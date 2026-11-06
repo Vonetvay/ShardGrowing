@@ -102,6 +102,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 90ac06d288653fe46b3a42797094445d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PyriteCrystalNew
+  _animationProgress: 0
+  _animationStep: 0.1
   vertexCount: 4
   _seed: 1.68
   _mass: 35

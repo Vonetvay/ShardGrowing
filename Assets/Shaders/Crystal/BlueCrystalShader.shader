@@ -84,7 +84,7 @@ Shader "Crystal/BlueCrystalShader"
             float4 frag(Varyings IN) : SV_Target
             {
                 float4 color = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, IN.uv) * _BaseColor;
-                return lerp(_BaseColor, _DarkColor, IN.darkness) * lerp(_GradiendColorY, _BaseColor, IN.uv.y) * (1.0, 1.0, 1.0, _Alpha);
+                return lerp(_BaseColor, _DarkColor, IN.darkness) * lerp(_GradiendColorY, _BaseColor, pow(IN.uv.y, 1.5)) * (1.0, 1.0, 1.0, _Alpha);
             }
             ENDHLSL
         }

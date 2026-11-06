@@ -229,6 +229,21 @@ public class DrawCrystalWithTexture : MonoBehaviour
         return new float2(xProj, 0f);
     }
 
+    public static float3 ProjectOnAxisX3D(float3 a, float3 d)
+    {
+        // Если d.y равно 0, проецирование невозможно (лучи параллельны оси OX)
+        if (math.abs(d.y) < 1e-6f)
+        {
+            Debug.LogError("Направление проецирования параллельно оси абсцисс!");
+            return float3.zero;
+        }
+
+        // Вычисляем координату X косой проекции
+        float xProj = a.x - a.y * (d.x / d.y);
+
+        return new float3(xProj, 0f, a.z);
+    }
+
     public static float myLerp(float a, float b, float t) 
     {
         if (t < -1f || t > 1f) return 0f;

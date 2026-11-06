@@ -3,7 +3,7 @@ using Unity.Mathematics;
 using UnityEngine;
 
 public record TestShardParams(float3 Position, float4x4 BaseMatrix, float ZOffset, float Delay, float Duration,
-    float Height, float Width, float Direction) : ShardParams(Position, BaseMatrix, ZOffset, Delay, Duration);
+    float Height, float Width, float Direction) : ShardParams(Position, BaseMatrix, float4x4.identity, ZOffset, Delay, Duration);
 
 public class NewAnimationTest : CrystalNew
 {
@@ -21,7 +21,7 @@ public class NewAnimationTest : CrystalNew
         return shards;
     }
 
-    protected override void SetShardVertices(NativeSlice<float3> vertices, int index, ShardParams parameters)
+    /*protected override void SetShardAnimation(NativeSlice<float2> animationUVs, int index, ShardParams parameters)
     {
         if (parameters is TestShardParams p) { }
         else return;
@@ -39,7 +39,7 @@ public class NewAnimationTest : CrystalNew
         vertices[3] = new float3(math.mul(transM, new float2(0.5f, 0.8f)), p.ZOffset) + p.Position;
         vertices[4] = new float3(math.mul(transM, new float2(0f, 1f)), p.ZOffset) + p.Position;
     }
-
+*/
     protected override void SetShardTriangles(NativeSlice<int> triangles, int baseIndex, ShardParams parameters)
     {
         if (parameters is TestShardParams p) { }

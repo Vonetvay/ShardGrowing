@@ -4,7 +4,7 @@ using Unity.Mathematics;
 using UnityEngine;
 
 public record GreenGroundShardParams(float3 Position, float4x4 BaseMatrix, float ZOffset, float Delay, float Duration,
-    float Width, float Height, float Direction, float PeakRatio, float TopWidthRatio) : ShardParams(Position, BaseMatrix, ZOffset, Delay, Duration);
+    float Width, float Height, float Direction, float PeakRatio, float TopWidthRatio) : ShardParams(Position, BaseMatrix, float4x4.identity, ZOffset, Delay, Duration);
 
 public class GreenGroundCrystal : CrystalNew
 {

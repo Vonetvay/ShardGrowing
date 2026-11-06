@@ -118,6 +118,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d6d125bd5d3d10744be1f4834cb56eab, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Slag
+  _animationProgress: 0
+  _animationStep: 0.1
   vertexCount: 4
   _seed: 0
   _mass: 40

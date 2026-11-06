@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 public record PyriteShardParams(float3 Position, float4x4 BaseMatrix, float ZOffset, float Delay, float Duration, float Side, float Direction)
-    : ShardParams(Position, BaseMatrix, ZOffset, Delay, Duration), IComparable<PyriteShardParams>
+    : ShardParams(Position, BaseMatrix, float4x4.identity, ZOffset, Delay, Duration), IComparable<PyriteShardParams>
 {
     public int CompareTo(PyriteShardParams obj)
     {
