@@ -43,14 +43,14 @@ Material:
     m_Floats:
     - _EnableExternalAlpha: 0
     - _EndZ: 1
-    - _Progress: 0
-    - _Size: 1
+    - _Progress: 1
+    - _Size: 1.31
     - _StartZ: 0
     - _ZWrite: 0
     m_Colors:
     - _BaseColor: {r: 0.38999996, g: 0.7, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
-    - _DarkColor: {r: 0, g: 0.27999997, b: 0.54999995, a: 1}
+    - _DarkColor: {r: 0, g: 0.21529636, b: 0.4245283, a: 1}
     - _GradiendColorY: {r: 0, g: 0, b: 0, a: 1}
     - _RendererColor: {r: 1, g: 1, b: 1, a: 1}
   m_BuildTextureStacks: []

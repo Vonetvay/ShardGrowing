@@ -2,7 +2,6 @@ Shader "Crystal/BlueCrystalShader"
 {
     Properties
     {
-        _Progress("Progress", Range(0.0, 1.0)) = 1.0
         _BaseColor("Crystal Color", Color) = (0.18, 0.89, 0.58, 1.0)
         _GradiendColorY("GCY", Color) = (0.0, 0.0, 0.0, 1.0)
         _DarkColor("Dark Color", Color) = (0.07, 0.35, 0.23, 1.0)
@@ -11,7 +10,7 @@ Shader "Crystal/BlueCrystalShader"
 
     SubShader
     {
-        Tags { "RenderType" = "Opaque" "Queue" = "Opaque" "RenderPipeline" = "UniversalPipeline" }
+        Tags { "RenderType" = "Opaque" "RenderPipeline" = "UniversalPipeline" }
 
         Pass
         {
@@ -21,7 +20,12 @@ Shader "Crystal/BlueCrystalShader"
             #pragma fragment frag
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-            #include "Assets/CrystalGrowth.compute"
+
+            struct Attributes
+            {
+                float4 positionOS : POSITION;
+                float2 uv : TEXCOORD0;
+            };
 
             struct Varyings
             {
@@ -40,18 +44,16 @@ Shader "Crystal/BlueCrystalShader"
                 float4 _BaseMap_ST;
             CBUFFER_END
 
-            Varyings vert(CrystalAttributes IN)
+            Varyings vert(Attributes IN)
             {
                 Varyings o;
 
-                // 1. Получаем измененную позицию из общего файла
-                float3 grownPositionOS = CalculateCrystalGrowth(IN);
 
                 // 2. Переносим трансформацию и UV сюда, в уникальный шейдер:
-                o.positionHCS = TransformObjectToHClip(grownPositionOS.xyz);
+                o.positionHCS = TransformObjectToHClip(IN.positionOS.xyz);
                 o.uv = IN.uv;
 
-                o.darkness = saturate(grownPositionOS.z);
+                o.darkness = saturate(IN.positionOS.z);
 
                 return o;
             }

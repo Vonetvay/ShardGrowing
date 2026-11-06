@@ -103,7 +103,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GreenGroundCrystal
   vertexCount: 6
-  _seed: 13.9
+  _seed: 14.2
   _mass: 25
   _density: 25
   _countRange: {x: 5, y: 8}

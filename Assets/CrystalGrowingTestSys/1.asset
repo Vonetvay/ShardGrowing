@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: 1
   m_EditorClassIdentifier: Assembly-CSharp::CrystalData
   crystalName: "\u0413\u0430\u043B\u0438\u043C\u0438\u0442"
-  visualPrefab: {fileID: 2688466821582388792, guid: 29f5bde363920d342aa8c25465c8d803, type: 3}
+  visualPrefab: {fileID: 1779338362036638705, guid: c958cbd210002374d87cd25cc7f2f3e7, type: 3}
   shader: {fileID: 4800000, guid: 40b7279a940f0da45b9a455337f01c84, type: 3}
-  density: 25
+  density: 5
   quality: 1

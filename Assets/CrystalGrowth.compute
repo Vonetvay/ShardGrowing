@@ -11,8 +11,9 @@ struct CrystalAttributes
 {
     float4 positionOS : POSITION;
     float2 uv : TEXCOORD0;
-    float2 uv3 : TEXCOORD2;
-    float2 uv4 : TEXCOORD3;
+    float2 uv2 : TEXCOORD2;
+    float2 uv3 : TEXCOORD3;
+    float2 uv4 : TEXCOORD4;
 };
 
 // Выходная структура (мост между вертексом и фрагментом).
@@ -21,9 +22,9 @@ struct CrystalAttributes
 // Главная функция, которая инкапсулирует в себя всю вашу сложную логику
 float3 CalculateCrystalGrowth(CrystalAttributes v)
 {
-    float delay = v.uv3.x;
-    float duration = v.uv3.y;
-    float2 position = v.uv4;
+    float delay = v.uv2.x;
+    float duration = v.uv2.y;
+    float2 position = v.uv3;
 
     // Математика роста
     float t = saturate((_Progress - delay) / max(0.0001, duration));
@@ -34,6 +35,38 @@ float3 CalculateCrystalGrowth(CrystalAttributes v)
 
     // Возвращаем измененную позицию в локальных координатах объекта
     return modifiedPos;
+}
+
+float2 RotateZ(float2 pos, float angle)
+{
+    float s, c;
+    sincos(angle, s, c);
+    float2 rotated;
+    rotated.x = pos.x * c - pos.y * s;
+    rotated.y = pos.x * s + pos.y * c;
+    return rotated;
+}
+
+float3 NewCalculateCrystalGrowth(CrystalAttributes v)
+{
+    float rotation = v.uv4.x;
+    float durationX = v.uv2.x;
+    float durationY = v.uv2.y;
+    float2 position = v.uv3.xy;
+    
+    float2 originalLocalPos = RotateZ(v.positionOS.xy, -rotation);
+    
+    float progressX = saturate(_Progress / max(0.0001, durationX));
+    float progressY = saturate(_Progress / max(0.0001, durationY));
+    
+    float2 modifiedPos = 0.0;
+    
+    modifiedPos.x = lerp(position.x, originalLocalPos.x, progressX);
+    modifiedPos.y = lerp(position.y, originalLocalPos.y, progressY);
+    
+    float2 worldPos = RotateZ(modifiedPos, rotation);
+    
+    return (worldPos.x, worldPos.y, v.positionOS.z);
 }
 
 #endif

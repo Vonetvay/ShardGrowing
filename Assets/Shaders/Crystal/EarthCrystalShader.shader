@@ -2,8 +2,6 @@ Shader "Custom/EarthCrystalShader"
 {
     Properties
     {
-        _Progress("Progress", Range(0.0, 1.0)) = 1.0
-
         _EdgeColor("EdgeColor", Color) = (0.588, 0.294, 0.0, 1.0)
         _CenterColor("CenterColor", Color) = (0.635, 0.396, 0.243, 1.0)
         _BackgroundBlackout("BackgroundBlackout", Color) = (0.3, 0.3, 0.3, 1.0)
@@ -25,7 +23,12 @@ Shader "Custom/EarthCrystalShader"
             #pragma fragment frag
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-            #include "Assets/CrystalGrowth.compute"
+
+            struct Attributes
+            {
+                float4 positionOS : POSITION;
+                float2 uv : TEXCOORD0;
+            };
 
             struct Varyings
             {
@@ -43,21 +46,22 @@ Shader "Custom/EarthCrystalShader"
             float _GradientHardness;
             half4 _BackgroundBlackout;
 
+            TEXTURE2D(_GlobalVoronoiTex);
+            SAMPLER(sampler_GlobalVoronoiTex);
+
             CBUFFER_START(UnityPerMaterial)
                 float4 _BaseMap_ST;
             CBUFFER_END
 
-            Varyings vert(CrystalAttributes IN)
+            Varyings vert(Attributes IN)
             {
                 Varyings o;
 
-                // 1. Получаем измененную позицию из общего файла
-                float3 grownPositionOS = CalculateCrystalGrowth(IN);
 
-                o.darkness = saturate(grownPositionOS.z);
+                o.darkness = saturate(IN.positionOS.z);
 
                 // 2. Переносим трансформацию и UV сюда, в уникальный шейдер:
-                o.positionHCS = TransformObjectToHClip(grownPositionOS.xyz);
+                o.positionHCS = TransformObjectToHClip(IN.positionOS.xyz);
                 o.uv = IN.uv;
 
                 return o;
@@ -65,7 +69,7 @@ Shader "Custom/EarthCrystalShader"
 
             half4 frag(Varyings IN) : SV_Target
             {
-                half4 color = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, IN.uv) * (1.0, 1.0, 1.0, 1.0);
+                half4 color = SAMPLE_TEXTURE2D(_GlobalVoronoiTex, sampler_GlobalVoronoiTex, IN.uv) * (1.0, 1.0, 1.0, 1.0);
 
                 half2 offset = abs(IN.uv - half2(0.5, 0.5));
 

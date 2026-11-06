@@ -29,6 +29,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _Alpha: 1
     - _Progress: 1
     m_Colors:
     - _BaseColor: {r: 0.38999996, g: 0.7, b: 1, a: 1}

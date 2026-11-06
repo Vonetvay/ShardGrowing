@@ -67,7 +67,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: c0a8f0bf66f08664b993e432a9765252, type: 2}
+  - {fileID: 2100000, guid: f078ac7f7722a6c4188299f75b0843ea, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -103,7 +103,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BlueCrystalNew
   vertexCount: 5
-  _seed: 19.7
+  _seed: 20.1
   _mass: 25
   _density: 25
   _widthRatioRange: {x: 0.2, y: 0.3}
@@ -172,4 +172,5 @@ MonoBehaviour:
   _slopeRatioRange: {x: 0.1, y: 0.2}
   _peakRatioRange: {x: 0.1, y: 0.3}
   _countRange: {x: 8, y: 15}
+  _delayOffsetRange: {x: 0, y: 0}
   _growAngle: 2.08

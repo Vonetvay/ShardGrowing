@@ -18,6 +18,7 @@ public class BlueCrystalNew : CrystalNew
     [SerializeField] private Vector2 _slopeRatioRange;
     [SerializeField] private Vector2 _peakRatioRange;
     [SerializeField] private Vector2Int _countRange;
+    [SerializeField] private Vector2 _delayOffsetRange;
     [SerializeField][Range(0f, Mathf.PI * 2)] private float _growAngle;
     private bool _sortBySize = true;
 
@@ -51,7 +52,10 @@ public class BlueCrystalNew : CrystalNew
             float peakRatio = SeedOperations.RandomNumberFromSeed(ref seed, _peakRatioRange);
             float zOffset = count > 1 ? i / (float)(count - 1) : 0f;
 
-            shards[i] = new BlueShardParams(offset, float4x4.identity, zOffset, 0f, height / maxHeight,
+            float delayOffset = SeedOperations.RandomNumberFromSeed(ref seed, _delayOffsetRange);
+            float delay = math.saturate(1f - height / maxHeight + delayOffset);
+
+            shards[i] = new BlueShardParams(offset, float4x4.identity, zOffset, delay, 1f - delay,
                 width, height, direction, slopeRatio, peakRatio);
         }
 

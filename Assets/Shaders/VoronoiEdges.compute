@@ -1,0 +1,78 @@
+#pragma kernel CSMain
+
+RWTexture2D<float4> Result;
+
+uint _Resolution;
+float _CellDensity;
+float _AngleOffset;
+float _EdgeThickness;
+float _EdgeSmoothness;
+float4 _EdgeColor;
+float4 _CellColor;
+
+float2 hash2(float2 p, float offset)
+{
+    float2 m = float2(dot(p, float2(127.1f, 311.7f)), dot(p, float2(269.5f, 183.3f)));
+    return frac(sin(m) * 43758.5453f) * offset;
+}
+
+float GetVoronoiEdgeDistance(float2 uv)
+{
+    float2 g = floor(uv);
+    float2 f = frac(uv);
+    
+    float2 mg = float2(0.0f, 0.0f);
+    float2 mr = float2(0.0f, 0.0f);
+    float md = 8.0f;
+    
+    for (int y = -1; y <= 1; y++)
+    {
+        for (int x = -1; x <= 1; x++)
+        {
+            float2 lattice = float2((float) x, (float) y);
+            float2 offset = hash2(g + lattice, _AngleOffset);
+            float2 r = lattice + offset - f;
+            float d = dot(r, r);
+
+            if (d < md)
+            {
+                md = d;
+                mr = r;
+                mg = lattice;
+            }
+        }
+    }
+
+    md = 8.0f;
+    for (int y2 = -2; y2 <= 2; y2++)
+    {
+        for (int x2 = -2; x2 <= 2; x2++)
+        {
+            float2 lattice = mg + float2((float) x2, (float) y2);
+            float2 offset = hash2(g + lattice, _AngleOffset);
+            float2 r = lattice + offset - f;
+
+            if (dot(mr - r, mr - r) > 0.00001f)
+            {
+                float d = dot(0.5f * (mr + r), normalize(r - mr));
+                md = min(md, d);
+            }
+        }
+    }
+    return md;
+}
+
+[numthreads(8, 8, 1)]
+void CSMain(uint3 id : SV_DispatchThreadID)
+{
+    if (id.x >= _Resolution || id.y >= _Resolution)
+        return;
+
+    float2 uv = float2((float) id.x, (float) id.y) / (float) _Resolution;
+    float2 scaledUV = uv * _CellDensity;
+    
+    float distanceToEdge = GetVoronoiEdgeDistance(scaledUV);
+    float edgeMask = 1.0f - smoothstep(_EdgeThickness, _EdgeThickness + _EdgeSmoothness, distanceToEdge);
+    
+    Result[id.xy] = lerp(_CellColor, _EdgeColor, edgeMask);
+}

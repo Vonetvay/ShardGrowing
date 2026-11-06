@@ -103,7 +103,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PyriteCrystalNew
   vertexCount: 4
-  _seed: 1.56
+  _seed: 1.68
   _mass: 35
   _density: 35
   _rootSideRange: {x: 1, y: 1}
