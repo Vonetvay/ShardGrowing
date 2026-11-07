@@ -48,6 +48,7 @@ public class Jar : InteractiveObject, IPowderContainer
     private void Start()
     {
         UpdateVisuals();
+        UpdateImageColor(_composition.GetComponents());
     }
 
     public override void Interact(GameObject draggedObject)
@@ -80,13 +81,13 @@ public class Jar : InteractiveObject, IPowderContainer
         float remainingRatio = (currentTotal - actualTotalPour) / currentTotal;
 
         // Создаем смесь для передачи (берем разницу через вычитание остатка)
-        PowderComposition pourMix = _composition.Subtract(currentTotal - actualTotalPour);
+        PowderComposition portion = _composition.Subtract(actualTotalPour);
 
         // Передаем порцию в цель
-        targetContainer.ReceivePowder(pourMix);
+        targetContainer.ReceivePowder(portion);
 
         // У себя оставляем только то, что должно остаться
-        _composition = _composition.Subtract(actualTotalPour);
+        //_composition = _composition.Subtract(actualTotalPour);
 
         UpdateVisuals();
     }
@@ -110,13 +111,13 @@ public class Jar : InteractiveObject, IPowderContainer
         if (actualTotalPour < minAmount || actualTotalPour <= 0f) return 0f;
 
         // 5. Отделяем порцию состава для передачи
-        PowderComposition pourMix = _composition.Subtract(currentTotal - actualTotalPour);
+        PowderComposition portion = _composition.Subtract(actualTotalPour);
 
         // Передаем в целевой контейнер
-        float receivedAmount = targetContainer.ReceivePowder(pourMix);
+        float receivedAmount = targetContainer.ReceivePowder(portion);
 
         // Уменьшаем свой объем ровно на столько, сколько цель смогла принять
-        _composition = _composition.Subtract(receivedAmount);
+        //_composition = _composition.Subtract(receivedAmount);
 
         UpdateVisuals();
         return receivedAmount;
@@ -133,12 +134,13 @@ public class Jar : InteractiveObject, IPowderContainer
         // Если пересыпается лишь часть смеси (не влезает полностью), уменьшаем её перед добавлением
         if (amountToAdd < mixAmount)
         {
-            mix = mix.Subtract(mixAmount - amountToAdd);
+            mix.Subtract(amountToAdd);
         }
 
         // Объединяем текущую смесь с входящей порцией
         _composition = _composition.Add(mix);
         UpdateVisuals();
+        UpdateImageColor(_composition.GetComponents());
 
         return amountToAdd;
     }
@@ -163,8 +165,6 @@ public class Jar : InteractiveObject, IPowderContainer
         {
             _owi.Info.Add($"{MaterialManager.Instance.GetMaterial(kvp.Key).materialName}  {(int)(kvp.Value * 10000f) / 100f}%");
         }
-
-        UpdateImageColor(components);
     }
 
     private void UpdateImageColor(Dictionary<MaterialType, float> components)
@@ -193,4 +193,14 @@ public class Jar : InteractiveObject, IPowderContainer
     public float GetTotalAmount() => _composition.GetTotalAmount();
     public float GetAvailableSpace() => Mathf.Max(0f, _maxAmount - _composition.GetTotalAmount());
     public PowderComposition GetComposition() => _composition;
+
+    public PowderComposition GivePowderPortion(float amount)
+    {
+        if (amount > GetTotalAmount()) return new PowderComposition();
+
+        PowderComposition _passedComposition = _composition.Subtract(amount);
+        UpdateVisuals();
+
+        return _passedComposition;
+    }
 }

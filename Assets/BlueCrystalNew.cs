@@ -18,6 +18,7 @@ public struct CrystalGrowthLevel
     public Vector2Int CountRange;
     [Range(0f, Mathf.PI)] public float DirectionRange;
     public float Delay;
+    [Min(0f)] public float _maxXOffset;
 
     [NonSerialized] public int count;
 }
@@ -39,7 +40,7 @@ public class BlueCrystalNew : CrystalNew
     [Header("Настройки кристалла")]
     [SerializeField] private Vector2 _widthRatioRange;
     [SerializeField] private AnimationCurve _heightCurve;
-    [SerializeField] private Vector2 _xOffsetRange;
+    
     [SerializeField] private Vector2 _yOffsetRange;
     [SerializeField] private Vector2 _slopeRatioRange;
     [SerializeField] private Vector2 _peakRatioRange;
@@ -111,7 +112,10 @@ public class BlueCrystalNew : CrystalNew
                 float direction = GetUniformDirection(ref seed, directions, level.DirectionRange, _directionSampleCount);//SeedOperations.RandomNumberFromSeed(ref seed, (Mathf.PI - level.DirectionRange) / 2f, (Mathf.PI + level.DirectionRange) / 2f);
                 directions[i] = direction;
                 float3 offset = new float3(
-                    SeedOperations.RandomNumberFromSeed(ref seed, _xOffsetRange),
+                    SeedOperations.RandomNumberFromSeed(ref seed, 
+                    level._maxXOffset * (-1f + math.sign(math.cos(direction))) / 2f, 
+                    level._maxXOffset * (1f + math.sign(math.cos(direction))) / 2f
+                    ),
                     SeedOperations.RandomNumberFromSeed(ref seed, _yOffsetRange),
                     0f
                     );

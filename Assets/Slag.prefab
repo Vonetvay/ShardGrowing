@@ -120,10 +120,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Slag
   _animationProgress: 0
   _animationStep: 0.1
+  _growthDuration: 5
+  _shardAnimationProgress: 0.1
   vertexCount: 4
   _seed: 0
   _mass: 40
   _density: 40
+  _growthRecipe: {fileID: 0}
+  _growthUpAmount: 0
+  _shader: {fileID: 0}
+  _material: {fileID: 0}
+  _crackedTex: {fileID: 0}
 --- !u!61 &-958058905674097838
 BoxCollider2D:
   m_ObjectHideFlags: 0

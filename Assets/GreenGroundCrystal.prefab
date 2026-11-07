@@ -104,10 +104,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GreenGroundCrystal
   _animationProgress: 0
   _animationStep: 0.1
+  _growthDuration: 5
+  _shardAnimationProgress: 0.1
   vertexCount: 6
   _seed: 14.2
   _mass: 25
   _density: 25
+  _growthRecipe: {fileID: 0}
+  _growthUpAmount: 0
+  _shader: {fileID: 0}
+  _material: {fileID: 0}
+  _crackedTex: {fileID: 0}
   _countRange: {x: 5, y: 8}
   _widthRatioRange: {x: 0.32, y: 0.64}
   _heightCurve:

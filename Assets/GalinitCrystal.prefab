@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 5619520477341578517}
   - component: {fileID: 5267379588349076114}
   - component: {fileID: 5009523793908457505}
+  - component: {fileID: 5224820758330370758}
   m_Layer: 0
   m_Name: GalinitCrystal
   m_TagString: Untagged
@@ -104,25 +105,35 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::BlueCrystalNew
   _animationProgress: 1
   _animationStep: 0.1
+  _growthDuration: 5
+  _shardAnimationProgress: 0.1
   vertexCount: 5
-  _seed: 101.5
+  _seed: 124.7
   _mass: 25
   _density: 10
+  _growthRecipe: {fileID: 11400000, guid: 8019f086c0fae6846998e2379b944346, type: 2}
+  _growthUpAmount: 10
+  _shader: {fileID: 4800000, guid: 40b7279a940f0da45b9a455337f01c84, type: 3}
+  _material: {fileID: 0}
+  _crackedTex: {fileID: 2800000, guid: 50b44c3abf1c0c64b93b30be5826caf2, type: 3}
   _largeCrystalLevel:
     HeightRange: {x: 0.86021507, y: 1}
     CountRange: {x: 2, y: 5}
-    DirectionRange: 1.62
+    DirectionRange: 1.96
     Delay: 0
+    _maxXOffset: 0
   _mediumCrystalLevel:
     HeightRange: {x: 0.60215056, y: 0.7849463}
     CountRange: {x: 5, y: 8}
-    DirectionRange: 2.39
+    DirectionRange: 2.36
     Delay: 0.2
+    _maxXOffset: 0.13
   _smallCrystalLevel:
     HeightRange: {x: 0.05376342, y: 0.37634397}
     CountRange: {x: 15, y: 20}
-    DirectionRange: 2.78
+    DirectionRange: 2.77
     Delay: 0.6
+    _maxXOffset: 0.23
   _directionSampleCount: 20
   _startingAnimationWidth: 0.2
   _startingAnimationConstantHeight: 0.1
@@ -188,10 +199,55 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  _xOffsetRange: {x: 0, y: 0}
   _yOffsetRange: {x: 0, y: 0}
   _slopeRatioRange: {x: 0.1, y: 0.2}
   _peakRatioRange: {x: 0.1, y: 0.3}
   _countRange: {x: 25, y: 35}
   _delayOffsetRange: {x: 0, y: 0}
   _growAngle: 2.75
+--- !u!61 &5224820758330370758
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3310636679526490315}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: -0.04879713, y: 1.2330191}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0, y: 0}
+    oldSize: {x: 0, y: 0}
+    newSize: {x: 0, y: 0}
+    adaptiveTilingThreshold: 0
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Size: {x: 3.234645, y: 2.4660382}
+  m_EdgeRadius: 0

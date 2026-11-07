@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class GlobalDaySystem : MonoBehaviour
@@ -7,5 +8,18 @@ public class GlobalDaySystem : MonoBehaviour
     public void ToNext() 
     {
         dayNumber++;
+        StartCoroutine(StartNewDay());
+    }
+
+    public IEnumerator StartNewDay() 
+    {
+        CrystalNew[] allCrystals = Object.FindObjectsByType<CrystalNew>(FindObjectsSortMode.None);
+
+        foreach (var item in allCrystals)
+        {
+            item.TryGrowthUp();
+        }
+
+        yield return null;
     }
 }

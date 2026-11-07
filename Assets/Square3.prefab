@@ -104,10 +104,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PyriteCrystalNew
   _animationProgress: 0
   _animationStep: 0.1
+  _growthDuration: 5
+  _shardAnimationProgress: 0.1
   vertexCount: 4
   _seed: 1.68
   _mass: 35
   _density: 35
+  _growthRecipe: {fileID: 0}
+  _growthUpAmount: 0
+  _shader: {fileID: 0}
+  _material: {fileID: 0}
+  _crackedTex: {fileID: 0}
   _rootSideRange: {x: 1, y: 1}
   _canRotatedRoot: 1
   _secondarySideFactorRange: {x: 0.1, y: 0.5}

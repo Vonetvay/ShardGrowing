@@ -1,7 +1,7 @@
+using NaughtyAttributes;
 using System;
 using Unity.Collections;
 using Unity.Mathematics;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Rendering;
 using static UnityEngine.Rendering.DebugUI;
@@ -9,11 +9,14 @@ using static UnityEngine.Rendering.DebugUI;
 public record ShardParams(float3 Position, float4x4 BaseMatrix, float4x4 TransformMatrix, float ZOffset, float Delay, float Duration);
 
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
-public class CrystalNew : MonoBehaviour
+public class CrystalNew : InteractiveObject
 {
     [Header("Настройка анимации")]
     [SerializeField][Range(0f, 1f)] protected float _animationProgress;
     [SerializeField] private float _animationStep = 0.1f;
+
+    [SerializeField] private int _growthDuration = 5;
+    [SerializeField] private float _shardAnimationProgress = 0.1f;
 
     [Header("Настройка кристалла")]
     [SerializeField] protected int vertexCount = 4;
@@ -21,9 +24,98 @@ public class CrystalNew : MonoBehaviour
     [SerializeField] private float _mass;
     [SerializeField] private float _density;
 
+    [SerializeField] private GrowthRecipe _growthRecipe;
+    [SerializeField] private float _growthUpAmount;
+
+    [Header("Шейдеры")]
+    [SerializeField] private Shader _shader;
+    [SerializeField] private Material _material;
+    [SerializeField] private Texture2D _crackedTex;
+    private MeshRenderer _meshRenderer;
+
+    private bool imNeedToFeed = true;
+
+    public override void Interact(GameObject draggedObject)
+    {
+        base.Interact(draggedObject);
+        if (!_canInteract) return;
+        if (draggedObject.TryGetComponent<IPowderContainer>(out IPowderContainer handContainer)) 
+        {
+            PowderComposition givenComposition = handContainer.GivePowderPortion(_growthUpAmount);
+            if (givenComposition.GetTotalAmount() <= 0f) return;
+
+            bool match = _growthRecipe.Matches(givenComposition.GetComponents(), 20f, ProcessType.Crystallization);
+            _canInteract = false;
+
+            imNeedToFeed = !match;
+
+            string matchString = match ? "подошла" : "не подошла"; 
+            Debug.Log($"Кристалл покормлен, смесь {matchString}");
+        }
+    }
+
     public void OnValidate()
     {
         _animationProgress = Mathf.Round(_animationProgress / _animationStep) * _animationStep;
+        GenerateCrystal(_seed, _mass);
+    }
+
+    private void Awake()
+    {
+        _meshRenderer = GetComponent<MeshRenderer>();
+        InitMaterial();
+    }
+
+    private void InitMaterial() 
+    {
+        _material = new Material(_shader);
+        _meshRenderer.material = _material;
+        _material.SetTexture("_BaseMap", _crackedTex);
+    }
+
+    private void SetNormalState() 
+    {
+        _material.SetFloat("_TextureAlpha", 1f);
+    }
+
+    private void SetCrackedState() 
+    {
+        _material.SetFloat("_TextureAlpha", 0f);
+    }
+
+    public void TryGrowthUp() 
+    {
+        if (!imNeedToFeed)
+        {
+            SetNormalState();
+            GrowthUp();
+        }
+        else 
+        {
+            SetCrackedState();
+            Debug.Log("Кристалл треснул");
+        }
+    }
+
+    [Button("Вырасти")]
+    private void GrowthUp() 
+    {
+        if (_animationProgress == 1f) return;
+
+        _animationProgress += (1f - _shardAnimationProgress) / _growthDuration;
+        
+        if (_animationProgress >= 1f) _animationProgress = 1f;
+
+        imNeedToFeed = true;
+        _canInteract = true;
+
+        GenerateCrystal(_seed, _mass);
+    }
+
+    [Button("Вернуться к состоянию осколка")]
+    private void ReturnToShard() 
+    {
+        _animationProgress = _shardAnimationProgress;
         GenerateCrystal(_seed, _mass);
     }
 
@@ -49,9 +141,6 @@ public class CrystalNew : MonoBehaviour
         NativeArray<float3> vertices = new NativeArray<float3>(totalVertices, Allocator.Temp);
         NativeArray<int> triangles = new NativeArray<int>(totalTriangles, Allocator.Temp);
         NativeArray<float2> uvs = new NativeArray<float2>(totalVertices, Allocator.Temp);
-        //NativeArray<float2> timeAttributes = new NativeArray<float2>(totalVertices, Allocator.Temp);
-        //NativeArray<float2> positionAttributes = new NativeArray<float2>(totalVertices, Allocator.Temp);
-        //NativeArray<float2> spaceOrientation = new NativeArray<float2>(totalVertices, Allocator.Temp);
 
         for (int i = 0; i < count; i++)
         {
@@ -133,9 +222,6 @@ public class CrystalNew : MonoBehaviour
         vertices.Dispose();
         triangles.Dispose();
         uvs.Dispose();
-        /*timeAttributes.Dispose();
-        positionAttributes.Dispose();
-        spaceOrientation.Dispose();*/
 
         return 0f;//xSize * ySize;
     }

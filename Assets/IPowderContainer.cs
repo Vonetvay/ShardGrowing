@@ -6,5 +6,8 @@ public interface IPowderContainer
     float ReceivePowder(PowderComposition mix);
     float GetTotalAmount();
     float GetAvailableSpace();
+
+    PowderComposition GivePowderPortion(float amount);
+
     PowderComposition GetComposition();
 }

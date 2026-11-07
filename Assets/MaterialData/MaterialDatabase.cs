@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public enum MaterialType { Impurities, Blue, Red }
@@ -14,10 +15,19 @@ public struct MaterialPropertyData
     public float density;
 }
 
-public readonly struct PowderComposition
+public struct PowderComposition
 {
-    private readonly Dictionary<MaterialType, float> _powders;
-    private readonly float _totalAmount;
+    private Dictionary<MaterialType, float> _powders;
+    private float _totalAmount;
+
+    private void RedefineTotalAmount() 
+    {
+        _totalAmount = 0f;
+        foreach (var item in _powders)
+        {
+            _totalAmount += item.Value;
+        }
+    }
 
     public PowderComposition(Dictionary<MaterialType, float> powders)
     {
@@ -69,14 +79,20 @@ public readonly struct PowderComposition
             return new PowderComposition(new Dictionary<MaterialType, float>());
 
         float remainingRatio = (_totalAmount - amountToRemove) / _totalAmount;
-        var newPowders = new Dictionary<MaterialType, float>(_powders.Count);
+        var remainingPowders = new Dictionary<MaterialType, float>(_powders.Count);
+        float subtractRatio = amountToRemove / _totalAmount;
+        var subtractPowders = new Dictionary<MaterialType, float>(_powders.Count);
 
         foreach (var kvp in _powders)
         {
-            newPowders.Add(kvp.Key, kvp.Value * remainingRatio);
+            //newPowders.Add(kvp.Key, kvp.Value * remainingRatio);
+            subtractPowders.Add(kvp.Key, kvp.Value * subtractRatio);
+            remainingPowders.Add(kvp.Key, kvp.Value * remainingRatio);
         }
+        _powders = remainingPowders;
+        RedefineTotalAmount();
 
-        return new PowderComposition(newPowders);
+        return new PowderComposition(subtractPowders);
     }
 }
 

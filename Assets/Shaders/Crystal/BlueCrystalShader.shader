@@ -6,6 +6,8 @@ Shader "Crystal/BlueCrystalShader"
         _BaseColor("Crystal Color", Color) = (0.39, 0.7, 1.0, 1.0)
         _GradiendColorY("GCY", Color) = (0.0, 0.0, 0.0, 1.0)
         _DarkColor("Dark Color", Color) = (0.0, 0.28, 0.55, 1.0)
+        _TextureScale("TextureScale", Vector) = (0.06, 0.42, 0.0, 0.0)
+        _TextureAlpha("TextureAlpha", Range(0.0, 1.0)) = 1.0
         [MainTexture] _BaseMap("Base Map", 2D) = "white"
     }
 
@@ -44,6 +46,8 @@ Shader "Crystal/BlueCrystalShader"
                 float4 _DarkColor;
                 float4 _BaseMap_ST;
                 float _Alpha;
+                float2 _TextureScale;
+                float _TextureAlpha;
             CBUFFER_END
 
             Varyings vert(Attributes IN)
@@ -83,8 +87,8 @@ Shader "Crystal/BlueCrystalShader"
 
             float4 frag(Varyings IN) : SV_Target
             {
-                float4 color = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, IN.uv) * _BaseColor;
-                return lerp(_BaseColor, _DarkColor, IN.darkness) * lerp(_GradiendColorY, _BaseColor, pow(IN.uv.y, 1.5)) * (1.0, 1.0, 1.0, _Alpha);
+                float4 color = lerp(SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, IN.uv * _TextureScale.xy), (1.0, 1.0, 1.0, 1.0), _TextureAlpha);
+                return lerp(_BaseColor, _DarkColor, IN.darkness) * lerp(_GradiendColorY, _BaseColor, pow(IN.uv.y, 1.5)) * color;
             }
             ENDHLSL
         }
