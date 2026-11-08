@@ -1,19 +1,19 @@
 using UnityEngine;
-// Обязательно добавляем пространство имен новой системы ввода
 using UnityEngine.InputSystem;
 
 public class DragManager : MonoBehaviour
 {
     [Header("Текущее состояние")]
-    [SerializeField] private GameObject currentDraggedObject = null;
+    [SerializeField] private GameObject _currentDraggedObject = null;
 
     private Camera mainCamera;
     private Vector2 offset;
     private bool isDragging = false;
     private LayerMask _defaultLayer;
     private bool _isOverInteractiveObject = false;
+    private TerrainType _isOverTerrainType = TerrainType.None;
 
-    public GameObject CurrentDraggedObject => currentDraggedObject;
+    public GameObject CurrentDraggedObject => _currentDraggedObject;
 
     private void Awake()
     {
@@ -107,13 +107,13 @@ public class DragManager : MonoBehaviour
 
             if (draggableComponent != null)
             {
-                currentDraggedObject = draggableComponent.gameObject;
+                _currentDraggedObject = draggableComponent.gameObject;
                 draggableComponent.Dragged = true;
-                isDragging = draggableComponent.Dragged;
-                currentDraggedObject.layer = LayerMask.NameToLayer("Ignore Raycast");
+                isDragging = true;
+                _currentDraggedObject.layer = LayerMask.NameToLayer("Ignore Raycast");
 
                 // Считаем смещение
-                offset = (Vector2)currentDraggedObject.transform.position - mouseWorldPos;
+                offset = (Vector2)_currentDraggedObject.transform.position - mouseWorldPos;
             }
         }
     }
@@ -132,7 +132,8 @@ public class DragManager : MonoBehaviour
             if (interactiveComponent != null)
             {
                 _isOverInteractiveObject = true;
-                interactiveComponent.Interact(currentDraggedObject);
+                interactiveComponent.Interact(_currentDraggedObject);
+                return;
             }
             else
             {
@@ -144,24 +145,39 @@ public class DragManager : MonoBehaviour
         {
             _isOverInteractiveObject = false;
         }
+
+        Ray ray = mainCamera.ScreenPointToRay(screenPosition);
+        if (Physics.Raycast(ray, out RaycastHit hitTerrain) && hitTerrain.collider.gameObject != null && hitTerrain.collider.gameObject.layer == LayerMask.NameToLayer("Terrain"))
+        {
+            Vector2 uv = hitTerrain.textureCoord;
+
+            _isOverTerrainType = TerrainManager.Instance.GetTerrainFromUV(uv);
+
+            if (_currentDraggedObject.TryGetComponent<IInteractWithTerrain>(out IInteractWithTerrain tool)) 
+            {
+                (int, int) coord = TerrainManager.Instance.UVToPixelCoord(uv);
+                tool.TerrainInteract(TerrainManager.Instance, coord.Item1, coord.Item2);
+            }
+
+        }
     }
 
     private void DragObject(Vector2 screenPosition)
     {
         Vector2 mouseWorldPos = mainCamera.ScreenToWorldPoint(screenPosition);
 
-        float currentZ = currentDraggedObject.transform.position.z;
+        float currentZ = _currentDraggedObject.transform.position.z;
         Vector2 newPosition = mouseWorldPos + offset;
 
-        currentDraggedObject.transform.position = new Vector3(newPosition.x, newPosition.y, currentZ);
+        _currentDraggedObject.transform.position = new Vector3(newPosition.x, newPosition.y, currentZ);
     }
 
     private void EndDrag()
     {
-        currentDraggedObject.GetComponent<Draggable>().Dragged = false;
+        _currentDraggedObject.GetComponent<Draggable>().Dragged = false;
         isDragging = false;
-        currentDraggedObject.layer = _defaultLayer;
+        _currentDraggedObject.layer = _defaultLayer;
 
-        currentDraggedObject = null;
+        _currentDraggedObject = null;
     }
 }

@@ -27,22 +27,26 @@ public class Draggable : MonoBehaviour
 
     private void Update()
     {
-        if (_spriteRenderer != null) 
+        if (Dragged)
         {
-            if (Dragged)
+            if (_spriteRenderer != null) 
             {
                 _spriteRenderer.color = _defaultColor * new Color(1f, 1f, 1f, 0.5f);
                 _spriteRenderer.sortingOrder = 10;
-                _rigidbody.bodyType = RigidbodyType2D.Kinematic;
-                GetComponent<Collider2D>().enabled = false;
-            }
-            else 
+            } 
+            _rigidbody.bodyType = RigidbodyType2D.Kinematic;
+            GetComponent<Collider2D>().enabled = false;
+        }
+        else
+        {
+            if (_spriteRenderer != null) 
             {
                 _spriteRenderer.color = _defaultColor;
                 _spriteRenderer.sortingOrder = _defaultSortingOrder;
-                _rigidbody.bodyType = RigidbodyType2D.Dynamic;
-                GetComponent<Collider2D>().enabled = true;
-            }
+
+            } 
+            _rigidbody.bodyType = RigidbodyType2D.Dynamic;
+            GetComponent<Collider2D>().enabled = true;
         }
     }
 }

@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: M_PaintMaterial
+  m_Shader: {fileID: 4800000, guid: 4ada1b56990f25241b7270061efc8df0, type: 3}
+  m_Parent: {fileID: 0}
+  m_ModifiedSerializedProperties: 0
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_LockedProperties: 
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _MainTex:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SelfTexture2D:
+        m_Texture: {fileID: 8600000, guid: b5bf94a685169b84887f4ef8fbf7ee18, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _BrushSize: 0.02
+    m_Colors:
+    - _BrushColor: {r: 1, g: 1, b: 1, a: 1}
+    - _Center: {r: 0.53, g: 0.5, b: 0, a: 0}
+    - _PaintPosition: {r: 0.377335, g: 0.28712273, b: 0, a: 0}
+  m_BuildTextureStacks: []
+  m_AllowLocking: 1

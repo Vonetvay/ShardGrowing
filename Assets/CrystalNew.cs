@@ -8,8 +8,9 @@ using static UnityEngine.Rendering.DebugUI;
 
 public record ShardParams(float3 Position, float4x4 BaseMatrix, float4x4 TransformMatrix, float ZOffset, float Delay, float Duration);
 
+[RequireComponent(typeof(Draggable))]
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
-public class CrystalNew : InteractiveObject
+public class CrystalNew : InteractiveObject, IInteractWithTerrain
 {
     [Header("Настройка анимации")]
     [SerializeField][Range(0f, 1f)] protected float _animationProgress;
@@ -33,13 +34,14 @@ public class CrystalNew : InteractiveObject
     [SerializeField] private Texture2D _crackedTex;
     private MeshRenderer _meshRenderer;
 
-    private bool imNeedToFeed = true;
+    private bool _imNeedToFeed = true;
+    private bool _growing = false;
 
     public override void Interact(GameObject draggedObject)
     {
         base.Interact(draggedObject);
         if (!_canInteract) return;
-        if (draggedObject.TryGetComponent<IPowderContainer>(out IPowderContainer handContainer)) 
+        if (draggedObject.TryGetComponent<IPowderContainer>(out IPowderContainer handContainer))
         {
             PowderComposition givenComposition = handContainer.GivePowderPortion(_growthUpAmount);
             if (givenComposition.GetTotalAmount() <= 0f) return;
@@ -47,10 +49,15 @@ public class CrystalNew : InteractiveObject
             bool match = _growthRecipe.Matches(givenComposition.GetComponents(), 20f, ProcessType.Crystallization);
             _canInteract = false;
 
-            imNeedToFeed = !match;
+            _imNeedToFeed = !match;
 
-            string matchString = match ? "подошла" : "не подошла"; 
+            string matchString = match ? "подошла" : "не подошла";
             Debug.Log($"Кристалл покормлен, смесь {matchString}");
+        }
+        else if (draggedObject.TryGetComponent<Shovel>(out Shovel shovel))
+        {
+            _growing = false;
+            Debug.Log("Кристалл посажен");
         }
     }
 
@@ -81,11 +88,13 @@ public class CrystalNew : InteractiveObject
     private void SetCrackedState() 
     {
         _material.SetFloat("_TextureAlpha", 0f);
+        _canInteract = false;
     }
 
     public void TryGrowthUp() 
     {
-        if (!imNeedToFeed)
+        if (!_growing) return;
+        if (!_imNeedToFeed)
         {
             SetNormalState();
             GrowthUp();
@@ -106,7 +115,7 @@ public class CrystalNew : InteractiveObject
         
         if (_animationProgress >= 1f) _animationProgress = 1f;
 
-        imNeedToFeed = true;
+        _imNeedToFeed = true;
         _canInteract = true;
 
         GenerateCrystal(_seed, _mass);
@@ -266,5 +275,15 @@ public class CrystalNew : InteractiveObject
     protected virtual void SetShardOrientation(NativeSlice<float2> orientationUVs, int index, ShardParams parameters) 
     {
 
+    }
+
+    public void TerrainInteract(TerrainManager terrain, int cx, int cy)
+    {
+        TerrainType type = TerrainManager.Instance.GetTerrainFromCoord(cx, cy);
+        Debug.Log(type.ToString());
+        if (type == TerrainType.Field) 
+        {
+            _growing = true;
+        }
     }
 }
