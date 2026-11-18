@@ -58,6 +58,10 @@ public class DragManager : MonoBehaviour
         if (isDragging && currentMouse.rightButton.isPressed) 
         {
             CheckHover(screenPosition);
+            if (CurrentDraggedObject.TryGetComponent<IInteractOnMousePressed>(out IInteractOnMousePressed item)) 
+            {
+                item.InteractOnAir();
+            }
         }
 
         CheckObjectWithInfo(screenPosition);
@@ -107,13 +111,19 @@ public class DragManager : MonoBehaviour
 
             if (draggableComponent != null)
             {
-                _currentDraggedObject = draggableComponent.gameObject;
-                draggableComponent.Dragged = true;
-                isDragging = true;
-                _currentDraggedObject.layer = LayerMask.NameToLayer("Ignore Raycast");
+                bool apply = draggableComponent.SetState(new DraggableDraggedState());
 
-                // —читаем смещение
-                offset = (Vector2)_currentDraggedObject.transform.position - mouseWorldPos;
+                if (apply) 
+                {
+                    _currentDraggedObject = draggableComponent.gameObject;
+
+                    isDragging = true;
+                    _defaultLayer = _currentDraggedObject.layer;
+                    _currentDraggedObject.layer = LayerMask.NameToLayer("Ignore Raycast");
+
+                    // —читаем смещение
+                    offset = (Vector2)_currentDraggedObject.transform.position - mouseWorldPos;
+                }
             }
         }
     }
@@ -127,7 +137,7 @@ public class DragManager : MonoBehaviour
 
         if (hit.collider != null)
         {
-            InteractiveObject interactiveComponent = hit.collider.GetComponent<InteractiveObject>();
+            IInteractiveObject interactiveComponent = hit.collider.GetComponent<IInteractiveObject>();
 
             if (interactiveComponent != null)
             {
@@ -174,7 +184,7 @@ public class DragManager : MonoBehaviour
 
     private void EndDrag()
     {
-        _currentDraggedObject.GetComponent<Draggable>().Dragged = false;
+        _currentDraggedObject.GetComponent<Draggable>().SetState(new DraggableFreeState());
         isDragging = false;
         _currentDraggedObject.layer = _defaultLayer;
 

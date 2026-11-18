@@ -1,0 +1,93 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &4567288599625036097
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2913668975314964383}
+  - component: {fileID: 5174866886937112262}
+  m_Layer: 0
+  m_Name: Astronomy
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 0
+--- !u!4 &2913668975314964383
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4567288599625036097}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -29.40166, y: 7.97709, z: -2.09231}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5174866886937112262
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4567288599625036097}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3b2dbf10c0f423842ba244b4c567b082, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Astronomy
+  phi: 1.2038
+  lambda: 0.5774
+  S: 0
+  d: 0.43
+  a: 1.628
+  day: 180
+  writeParametersConsole: 0
+  simulation: 0
+  constS: 1
+  constDay: 1
+  dayInSecond: 36
+  bodies:
+  - color: {r: 0.015249729, g: 1, b: 0, a: 0.12941177}
+    name: spring
+    a: 0
+    d: 0
+    hide: 1
+  - color: {r: 0.3207547, g: 0.3207547, b: 0.3207547, a: 1}
+    name: Galileo
+    a: 0
+    d: 0
+    hide: 1
+  - color: {r: 1, g: 1, b: 1, a: 1}
+    name: Polay
+    a: 23149
+    d: 891551
+    hide: 1
+  - color: {r: 0.3820755, g: 0.64135164, b: 1, a: 1}
+    name: Sirius
+    a: 64509
+    d: -164258
+    hide: 1
+  - color: {r: 1, g: 0.43618035, b: 0, a: 1}
+    name: Betel
+    a: 55510
+    d: 72425
+    hide: 1
+  sphereColor: {r: 1, g: 1, b: 1, a: 0.050980393}
+  bodyColor: {r: 0, g: 0, b: 0, a: 1}
+  lineColor: {r: 1, g: 0, b: 0, a: 1}
+  horizontalColor: {r: 0, g: 1, b: 0, a: 1}
+  positionLength: 1
+  springColor: {r: 0, g: 1, b: 0, a: 1}
+  sunColor: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
+  sphereRadius: 1
+  bodyRadius: 0.05
+  circleResolution: 16

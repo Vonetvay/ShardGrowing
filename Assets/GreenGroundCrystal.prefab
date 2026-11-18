@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 4381979175248200887}
   - component: {fileID: 6813799979347062587}
   - component: {fileID: 4964414670410931438}
+  - component: {fileID: 3795984671706089943}
   m_Layer: 0
   m_Name: GreenGroundCrystal
   m_TagString: Untagged
@@ -109,14 +110,16 @@ MonoBehaviour:
   _growthDuration: 5
   _shardAnimationProgress: 0.1
   vertexCount: 6
-  _seed: 14.2
-  _mass: 25
+  _seed: 24.1
+  _size: 0
   _density: 25
   _growthRecipe: {fileID: 0}
   _growthUpAmount: 0
+  _amountBar: {fileID: 0}
   _shader: {fileID: 0}
   _material: {fileID: 0}
   _crackedTex: {fileID: 0}
+  _growthIndicator: {fileID: 0}
   _countRange: {x: 5, y: 8}
   _widthRatioRange: {x: 0.32, y: 0.64}
   _heightCurve:
@@ -187,4 +190,40 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ca9126d81b8bc0841b93862292f8257c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Draggable
-  Dragged: 0
+--- !u!70 &3795984671706089943
+CapsuleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6516520970810110874}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: 0.039114326, y: 0.40616682}
+  m_Size: {x: 0.91139585, y: 0.81233364}
+  m_Direction: 1

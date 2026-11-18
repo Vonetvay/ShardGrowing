@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 [RequireComponent(typeof(Draggable))]
 [RequireComponent(typeof(ObjectWithInfo))]
-public class Jar : InteractiveObject, IPowderContainer
+public class Jar : MonoBehaviour, IInteractiveObject, IPowderContainerDynamic, IInteractOnMousePressed
 {
     [Serializable]
     public struct PowderAmount
@@ -17,6 +17,7 @@ public class Jar : InteractiveObject, IPowderContainer
     [Header("Settings")]
     [SerializeField] private float _maxAmount = 100f;
     [SerializeField] private float _pourSpeed = 20f;
+    [SerializeField] private float _pourRadius = 3f;
 
     [Header("References")]
     [SerializeField] private Image _contentImage;
@@ -48,12 +49,11 @@ public class Jar : InteractiveObject, IPowderContainer
     private void Start()
     {
         UpdateVisuals();
-        UpdateImageColor(_composition.GetComponents());
+        UpdateImageColor(_composition.GetComponentsInShares());
     }
 
-    public override void Interact(GameObject draggedObject)
+    public void Interact(GameObject draggedObject)
     {
-        base.Interact(draggedObject);
         if (draggedObject.TryGetComponent<Jar>(out var handJar))
         {
             handJar.PourValueInto(this);
@@ -64,6 +64,8 @@ public class Jar : InteractiveObject, IPowderContainer
     {
         float currentTotal = _composition.GetTotalAmount();
         if (currentTotal <= 0) return;
+
+        if (!targetContainer.CanIGetMixType(_composition)) return;
 
         // 1. Считаем, сколько МАКСИМУМ мы можем отдать в этом кадре
         float desiredPourAmount = Time.deltaTime * _pourSpeed;
@@ -92,7 +94,7 @@ public class Jar : InteractiveObject, IPowderContainer
         UpdateVisuals();
     }
 
-    public float InstantPourInto(IPowderContainer targetContainer, float minAmount, float maxAmount)
+    /*public float InstantPourInto(IPowderContainer targetContainer, float minAmount, float maxAmount)
     {
         float currentTotal = _composition.GetTotalAmount();
         if (currentTotal <= 0f) return 0f;
@@ -121,7 +123,7 @@ public class Jar : InteractiveObject, IPowderContainer
 
         UpdateVisuals();
         return receivedAmount;
-    }
+    }*/
 
     public float ReceivePowder(PowderComposition mix)
     {
@@ -140,7 +142,7 @@ public class Jar : InteractiveObject, IPowderContainer
         // Объединяем текущую смесь с входящей порцией
         _composition = _composition.Add(mix);
         UpdateVisuals();
-        UpdateImageColor(_composition.GetComponents());
+        UpdateImageColor(_composition.GetComponentsInShares());
 
         return amountToAdd;
     }
@@ -160,7 +162,7 @@ public class Jar : InteractiveObject, IPowderContainer
         _owi.Info.Add($"{(int)(currentTotal * 100f) / 100f}/{_maxAmount}г");
 
         // Процентное соотношение получаем напрямую через GetComponents() структуры
-        var components = _composition.GetComponents();
+        var components = _composition.GetComponentsInShares();
         foreach (var kvp in components)
         {
             _owi.Info.Add($"{MaterialManager.Instance.GetMaterial(kvp.Key).materialName}  {(int)(kvp.Value * 10000f) / 100f}%");
@@ -203,4 +205,20 @@ public class Jar : InteractiveObject, IPowderContainer
 
         return _passedComposition;
     }
+
+    public void InteractOnAir()
+    {
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, _pourRadius);
+        foreach (var collider in colliders) 
+        {
+            if (collider.gameObject.TryGetComponent<Crystal>(out Crystal crystal)) 
+            {
+                //PowderComposition pourMix = new PowderComposition(_composition.GetComponentsInShares(), _pourSpeed * Time.deltaTime);
+                PourValueInto(crystal);
+                //_composition.Subtract(crystal.ReceivePowder(pourMix));
+            }
+        }
+    }
+
+    public bool CanIGetMixType(PowderComposition mix) => true;
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using TMPro;
 using UnityEngine;
@@ -5,18 +6,33 @@ using UnityEngine;
 public class GlobalDaySystem : MonoBehaviour
 {
     [SerializeField] private TextMeshProUGUI _dayCounter;
-    private int dayNumber = 0;
+    public int DayNumber { get; private set; }
+
+    public static GlobalDaySystem Instance;
+
+    private void Awake()
+    {
+        DayNumber = 0;
+        if (Instance == null) 
+        {
+            Instance = this;
+        }
+    }
 
     public void ToNext() 
     {
-        dayNumber++;
-        _dayCounter.text = dayNumber.ToString();
+        DayNumber++;
+        _dayCounter.text = DayNumber.ToString();
         StartCoroutine(StartNewDay());
     }
 
     public IEnumerator StartNewDay() 
     {
-        CrystalNew[] allCrystals = Object.FindObjectsByType<CrystalNew>(FindObjectsSortMode.None);
+        QuestSystem.Instance.GenerateDailyQuests();
+
+        Crystal[] allCrystals = UnityEngine.Object.FindObjectsByType<Crystal>(FindObjectsSortMode.None);
+
+        Array.Sort(allCrystals, (a, b) => b.AnimationProgress.CompareTo(a.AnimationProgress));
 
         foreach (var item in allCrystals)
         {

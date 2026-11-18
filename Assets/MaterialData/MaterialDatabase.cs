@@ -20,13 +20,9 @@ public struct PowderComposition
     private Dictionary<MaterialType, float> _powders;
     private float _totalAmount;
 
-    private void RedefineTotalAmount() 
+    private void RedefineTotalAmount()
     {
-        _totalAmount = 0f;
-        foreach (var item in _powders)
-        {
-            _totalAmount += item.Value;
-        }
+        _totalAmount = _powders.Values.Sum();
     }
 
     public PowderComposition(Dictionary<MaterialType, float> powders)
@@ -37,7 +33,21 @@ public struct PowderComposition
         _totalAmount = _powders.Values.Sum();
     }
 
-    public Dictionary<MaterialType, float> GetComponents()
+    public PowderComposition(Dictionary<MaterialType, float> powdersShares, float amount)
+    {
+        _powders = powdersShares != null
+            ? new Dictionary<MaterialType, float>(powdersShares)
+            : throw new ArgumentNullException(nameof(powdersShares));
+
+        foreach (var key in powdersShares.Keys.ToList())
+        {
+            _powders[key] = powdersShares[key] * amount;
+        }
+
+        _totalAmount = _powders.Values.Sum();
+    }
+
+    public Dictionary<MaterialType, float> GetComponentsInShares()
     {
         var result = new Dictionary<MaterialType, float>(_powders.Count);
         if (_totalAmount <= 0) return result;
@@ -45,6 +55,18 @@ public struct PowderComposition
         foreach (var kvp in _powders)
         {
             result.Add(kvp.Key, kvp.Value / _totalAmount);
+        }
+        return result;
+    }
+
+    public Dictionary<MaterialType, float> GetComponents() 
+    {
+        var result = new Dictionary<MaterialType, float>(_powders.Count);
+        if (_totalAmount <= 0) return result;
+
+        foreach (var kvp in _powders)
+        {
+            result.Add(kvp.Key, kvp.Value);
         }
         return result;
     }

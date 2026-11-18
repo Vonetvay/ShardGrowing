@@ -1,52 +1,122 @@
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
+[RequireComponent(typeof(Collider2D))]
 public class Draggable : MonoBehaviour
 {
-    public bool Dragged;
-    private Color _defaultColor;
-    private int _defaultSortingOrder;
+    private DraggableState _state;
 
-    private SpriteRenderer _spriteRenderer;
-    private Rigidbody2D _rigidbody;
-    private Collider2D _collider;
+    public Rigidbody2D Rigidbody { get; private set; }
+    public Collider2D Collider { get; private set; }
 
     private void Awake()
     {
-        _spriteRenderer = GetComponent<SpriteRenderer>();
-        _rigidbody = GetComponent<Rigidbody2D>();
-        _rigidbody.gravityScale = 0f;
-        _rigidbody.linearDamping = 1f;
-        _rigidbody.freezeRotation = true;
-        if (_spriteRenderer != null) 
-        {
-            _defaultColor = _spriteRenderer.color;
-            _defaultSortingOrder = _spriteRenderer.sortingOrder;
-        }
+        Collider = GetComponent<Collider2D>();
+        Rigidbody = GetComponent<Rigidbody2D>();
+        Rigidbody.gravityScale = 0f;
+        Rigidbody.linearDamping = 1f;
+        Rigidbody.freezeRotation = true;
+
+        SetState(new DraggableFreeState());
     }
 
-    private void Update()
+    public bool SetState(DraggableState state)
     {
-        if (Dragged)
+        if (_state == null || _state.CanTransitionTo(state)) 
         {
-            if (_spriteRenderer != null) 
-            {
-                _spriteRenderer.color = _defaultColor * new Color(1f, 1f, 1f, 0.5f);
-                _spriteRenderer.sortingOrder = 10;
-            } 
-            _rigidbody.bodyType = RigidbodyType2D.Kinematic;
-            GetComponent<Collider2D>().enabled = false;
+            _state = state;
+            _state.Init(this);
+            _state.Enter();
+            return true;
         }
-        else
-        {
-            if (_spriteRenderer != null) 
-            {
-                _spriteRenderer.color = _defaultColor;
-                _spriteRenderer.sortingOrder = _defaultSortingOrder;
 
-            } 
-            _rigidbody.bodyType = RigidbodyType2D.Dynamic;
-            GetComponent<Collider2D>().enabled = true;
-        }
+        return false;
+    }
+
+    public bool TryStartDragging() 
+    {
+        return SetState(new DraggableDraggedState());
+    }
+
+    public bool TryEndDragging() 
+    {
+        return SetState(new DraggableFreeState());
+    }
+}
+
+public class DraggableState 
+{
+    protected Draggable _draggable;
+
+    public void Init(Draggable draggable) 
+    {
+        _draggable = draggable;
+    }
+
+    public virtual void Enter() 
+    {
+
+    }
+
+    public virtual bool CanTransitionTo(DraggableState state) 
+    {
+        return false;
+    }
+}
+
+public class DraggableDraggedState : DraggableState 
+{
+    public override void Enter()
+    {
+        base.Enter();
+        _draggable.Rigidbody.bodyType = RigidbodyType2D.Kinematic;
+        _draggable.Collider.enabled = false;
+    }
+
+    public override bool CanTransitionTo(DraggableState state)
+    {
+        return state is DraggableFreeState or DraggableLockedState;
+    }
+}
+
+public class DraggableFreeState : DraggableState
+{
+    public override void Enter()
+    {
+        base.Enter();
+        _draggable.Rigidbody.bodyType = RigidbodyType2D.Dynamic;
+        _draggable.Collider.enabled = true;
+    }
+
+    public override bool CanTransitionTo(DraggableState state)
+    {
+        return state is DraggableDraggedState or DraggableLockedState;
+    }
+}
+
+public class DraggableUnlockedState : DraggableState 
+{
+    public override void Enter()
+    {
+        _draggable.SetState(new DraggableFreeState());
+    }
+
+    public override bool CanTransitionTo(DraggableState state)
+    {
+        return state is DraggableFreeState;
+    }
+}
+
+public class DraggableLockedState : DraggableState
+{
+    public override void Enter()
+    {
+        base.Enter();
+        _draggable.Rigidbody.bodyType = RigidbodyType2D.Static;
+        _draggable.Collider.enabled = true;
+    }
+    public override bool CanTransitionTo(DraggableState state)
+    {
+        return state is DraggableUnlockedState;
     }
 }

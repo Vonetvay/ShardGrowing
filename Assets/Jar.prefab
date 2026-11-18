@@ -210,7 +210,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ca9126d81b8bc0841b93862292f8257c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Draggable
-  Dragged: 0
 --- !u!114 &9004431828520604031
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -224,7 +223,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Jar
   _maxAmount: 100
-  _pourSpeed: 5
+  _pourSpeed: 10
+  _pourRadius: 3
   _contentImage: {fileID: 5855583828990832682}
   _startingPowders: []
 --- !u!58 &461085243555045194
