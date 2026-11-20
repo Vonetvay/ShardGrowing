@@ -192,6 +192,7 @@ GameObject:
   - component: {fileID: 4344835685833679715}
   - component: {fileID: 3823262521358738745}
   - component: {fileID: 7517737503715501725}
+  - component: {fileID: -5716805635697463017}
   m_Layer: 8
   m_Name: Crystal
   m_TagString: Untagged
@@ -347,6 +348,19 @@ CapsuleCollider2D:
   m_Offset: {x: -0.0056781173, y: 0.16575538}
   m_Size: {x: 1.1588712, y: 0.33151075}
   m_Direction: 1
+--- !u!114 &-5716805635697463017
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3310636679526490315}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 74c3518a6ca198b40906ba7b47a19654, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ObjectWithInfo
+  Info: []
 --- !u!1 &7712371262733093881
 GameObject:
   m_ObjectHideFlags: 0

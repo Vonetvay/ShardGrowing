@@ -23,7 +23,9 @@ public class EarthCrystal : Crystal
     [SerializeField] private Vector2 _secondarySideFactorRange;
     [SerializeField] private Vector2Int _secondaryCountRange = new Vector2Int(1, 4);
     [SerializeField] private bool _canRotatedSecondary = false;
-    
+
+    protected override CrystalType GetMyType() => CrystalType.Earth;
+
     protected override ShardParams[] CrystalCalculator(ref float seed)
     {
         int countToSelect = SeedOperations.RandomNumberFromSeed(ref seed, _secondaryCountRange);

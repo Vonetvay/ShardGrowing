@@ -12,7 +12,7 @@ public record ShardParams(float3 Position, float4x4 BaseMatrix, float4x4 Transfo
 
 [RequireComponent(typeof(CapsuleCollider2D))]
 [RequireComponent(typeof(Draggable))]
-[RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
+[RequireComponent(typeof(MeshFilter), typeof(MeshRenderer), typeof(ObjectWithInfo))]
 public class Crystal : MonoBehaviour, IInteractiveObject, IInteractWithTerrain, IPowderContainer
 {
     [Header("Настройка анимации")]
@@ -52,6 +52,11 @@ public class Crystal : MonoBehaviour, IInteractiveObject, IInteractWithTerrain, 
 
     [SerializeField] private GameObject _growthIndicator;
 
+    protected ObjectWithInfo _owi;
+
+    public CrystalType Type { get; protected set; }
+    public CrystalSize Size { get; private set; }
+
     public void Interact(GameObject draggedObject)
     {
         if (!_canInteract) return;
@@ -78,13 +83,32 @@ public class Crystal : MonoBehaviour, IInteractiveObject, IInteractWithTerrain, 
 
     public void OnValidate()
     {
+        _owi = GetComponent<ObjectWithInfo>();
         _animationProgress = Mathf.Round(_animationProgress / _animationStep) * _animationStep;
+        Size = ConvertAnimationProgressToSize(_animationProgress);
         GenerateCrystal(_seed);
     }
 
-    private void Awake()
+    protected virtual void Awake()
     {
         Init();
+    }
+
+    private void UpdateObjectInfo() 
+    {
+        _owi.Info = new List<string>
+        {
+            $"{Type}",
+            $"{Size}"
+        };
+    }
+
+    private CrystalSize ConvertAnimationProgressToSize(float prog) 
+    {
+        if (prog < 0.3f) return CrystalSize.Small;
+        else if (prog < 0.6f) return CrystalSize.Middle;
+        else if (prog < 0.95f) return CrystalSize.Big;
+        return CrystalSize.Large;
     }
 
     private void InitMaterial() 
@@ -134,6 +158,7 @@ public class Crystal : MonoBehaviour, IInteractiveObject, IInteractWithTerrain, 
         _imNeedToFeed = true;
         _canInteract = true;
         _growthUpAmountCurrent = 0f;
+        Size = ConvertAnimationProgressToSize(_animationProgress);
         UpdateFeedAmountBar();
 
         GenerateCrystal(_seed);
@@ -143,9 +168,9 @@ public class Crystal : MonoBehaviour, IInteractiveObject, IInteractWithTerrain, 
 
     private void OverlappingNearCrystal() 
     {
-        List<Collider2D> _overlappedColliders = new List<Collider2D>();
+        List<Collider2D> _overlappedColliders = new();
 
-        ContactFilter2D filter = new ContactFilter2D();
+        ContactFilter2D filter = new();
         //filter.SetLayerMask(LayerMask.NameToLayer("Crystal"));
         //filter.useTriggers = false;
 
@@ -191,17 +216,25 @@ public class Crystal : MonoBehaviour, IInteractiveObject, IInteractWithTerrain, 
     private void ReturnToShard() 
     {
         _animationProgress = _shardAnimationProgress;
+        Size = ConvertAnimationProgressToSize(_animationProgress);
         GenerateCrystal(_seed);
     }
 
     [ContextMenu("Инициализировать")]
-    public void Init() 
+    public virtual void Init() 
     {
+        _seed = UnityEngine.Random.Range(0f, 1000f);
+        Type = GetMyType();
+        Size = CrystalSize.Shard;
         _meshRenderer = GetComponent<MeshRenderer>();
         _collider = GetComponent<CapsuleCollider2D>();
         _draggable = GetComponent<Draggable>();
+        _owi = GetComponent<ObjectWithInfo>();
         InitMaterial();
+        GenerateCrystal(_seed);
     }
+
+    protected virtual CrystalType GetMyType() => CrystalType.None;
 
     public float GenerateCrystal(float seed)
     {
@@ -210,7 +243,7 @@ public class Crystal : MonoBehaviour, IInteractiveObject, IInteractWithTerrain, 
         int triangleCount = vertexCount * 3 - 6;
         MeshFilter meshFilter = GetComponent<MeshFilter>();
 
-        Mesh mesh = new Mesh { name = "ProceduralCrystal" };
+        Mesh mesh = new() { name = "ProceduralCrystal" };
 
         float currentSeed = seed;
         SeedOperations.RandomNumberFromSeed(ref currentSeed, 0f, 1f);
@@ -223,15 +256,15 @@ public class Crystal : MonoBehaviour, IInteractiveObject, IInteractWithTerrain, 
         int totalVertices = vertexCount * count;
         int totalTriangles = triangleCount * count;
 
-        NativeArray<float3> vertices = new NativeArray<float3>(totalVertices, Allocator.Temp);
-        NativeArray<int> triangles = new NativeArray<int>(totalTriangles, Allocator.Temp);
-        NativeArray<float2> uvs = new NativeArray<float2>(totalVertices, Allocator.Temp);
+        NativeArray<float3> vertices = new(totalVertices, Allocator.Temp);
+        NativeArray<int> triangles = new(totalTriangles, Allocator.Temp);
+        NativeArray<float2> uvs = new(totalVertices, Allocator.Temp);
 
         for (int i = 0; i < count; i++)
         {
-            NativeSlice<float3> vertexSlice = new NativeSlice<float3>(vertices, i * vertexCount, vertexCount);
-            NativeSlice<int> triangleSlice = new NativeSlice<int>(triangles, i * triangleCount, triangleCount);
-            NativeSlice<float2> uvSlice = new NativeSlice<float2>(uvs, i * vertexCount, vertexCount);
+            NativeSlice<float3> vertexSlice = new(vertices, i * vertexCount, vertexCount);
+            NativeSlice<int> triangleSlice = new(triangles, i * triangleCount, triangleCount);
+            NativeSlice<float2> uvSlice = new(uvs, i * vertexCount, vertexCount);
 
             ShardCalculator(i, vertexCount, vertexSlice, triangleSlice, uvSlice, shardsParams[i]);
         }
@@ -271,6 +304,8 @@ public class Crystal : MonoBehaviour, IInteractiveObject, IInteractWithTerrain, 
         vertices.Dispose();
         triangles.Dispose();
         uvs.Dispose();
+
+        UpdateObjectInfo();
 
         return 0f;
     }

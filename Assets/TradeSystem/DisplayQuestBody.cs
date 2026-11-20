@@ -7,15 +7,19 @@ public class DisplayQuestBody : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _mainText;
     [SerializeField] private TextMeshProUGUI _deadlineText;
     [SerializeField] private TextMeshProUGUI _rewardText;
+    [SerializeField] private TextMeshProUGUI _sizeText;
+    [SerializeField] private TextMeshProUGUI _typeText;
 
-    public QuestTaskBody Quest;
+    public Quest Quest;
 
     public void Display() 
     {
-        _personNameText.text = Quest.PersonName;
-        _mainText.text = Quest.Text;
-        _deadlineText.text = Quest.Deadline.ToString();
-        _rewardText.text = Quest.Reward.ToString();
+        _personNameText.text = Quest.personName;
+        _mainText.text = Quest.body.Text;
+        _deadlineText.text = Quest.deadline.ToString();
+        _rewardText.text = Quest.reward.ToString();
+        _sizeText.text = Quest.size.ToString();
+        _typeText.text = Quest.type.ToString();
     }
 
     public void AcceptMe() 

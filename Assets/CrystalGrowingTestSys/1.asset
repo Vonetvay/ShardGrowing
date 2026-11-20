@@ -17,3 +17,5 @@ MonoBehaviour:
   shader: {fileID: 4800000, guid: 40b7279a940f0da45b9a455337f01c84, type: 3}
   density: 5
   quality: 1
+  type: 1
+  size: 0

@@ -5,15 +5,21 @@ using UnityEngine;
 
 public enum ProcessType { Crystallization, Melting }
 
-// 2. Класс-паспорт самого кристалла
-[CreateAssetMenu(fileName = "NewCrystal", menuName = "Crystals/Crystal Data")]
-public class CrystalData : ScriptableObject
+public enum CrystalType 
 {
-    public string crystalName;
-    public GameObject visualPrefab; // Как кристалл выглядит в мире
-    public Shader shader;
-    public float density;
-    public int quality;
+    None,
+    Galimit,
+    Earth,
+    Zeglyak
+}
+
+public enum CrystalSize 
+{
+    Shard,
+    Small,
+    Middle,
+    Big,
+    Large
 }
 
 // 3. Класс рецепта

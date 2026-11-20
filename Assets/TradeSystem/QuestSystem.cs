@@ -1,31 +1,37 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "new QuestTask", menuName = "Custom/QuestTask")]
-public class QuestTaskBody : ScriptableObject 
+public struct Quest 
 {
-    public string PersonName;
-    public string Text;
-    public Vector2Int DeadlineRange;
-    public Vector2 RewardRange;
-    public CrystalData Request;
-    public int Deadline;
-    public float Reward;
-    //public QuestTask Task;
-}
+    public Quest(QuestBody body,string personName, CrystalType type, CrystalSize size, int deadline, int reward, int address=0) 
+    {
+        this.body = body;
+        this.personName = personName;
+        this.type = type;
+        this.size = size;
+        this.deadline = deadline;
+        this.reward = reward;
+        this.address = address;
+    }
 
-/*public struct QuestTask 
-{
-    
-}*/
+    public QuestBody body;
+    public string personName;
+    public CrystalType type;
+    public CrystalSize size;
+    public int deadline;
+    public int reward;
+    public int address;
+}
 
 public class QuestSystem : MonoBehaviour
 {
-    public QuestTaskBody[] _questDatabase;
-    private Dictionary<int, HashSet<QuestTaskBody>> _currentTasks = new Dictionary<int, HashSet<QuestTaskBody>>();
-    private HashSet<GameObject> _questsBodies = new HashSet<GameObject>();
-    private Dictionary<QuestTaskBody, GameObject> _tasksBodies = new Dictionary<QuestTaskBody, GameObject>();
+    public QuestBody[] _questBodyDatabase;
+    private Dictionary<int, HashSet<Quest>> _currentTasks = new();
+    private HashSet<GameObject> _questVisuals = new();
+    private Dictionary<Quest, GameObject> _taskVisuals = new();
 
     public float Famous = 0f;
 
@@ -33,8 +39,11 @@ public class QuestSystem : MonoBehaviour
     [SerializeField] private GameObject _questVisual;
     [SerializeField] private GameObject _taskVisual;
     [SerializeField] private TextMeshProUGUI _famousCounter;
+    [SerializeField] private TextMeshProUGUI _walletVisuals;
     [SerializeField] private Transform _questContentTransform;
     [SerializeField] private Transform _taskContentTransform;
+
+    public static Action<int> SendToPerson;
 
     public static QuestSystem Instance;
 
@@ -48,60 +57,69 @@ public class QuestSystem : MonoBehaviour
 
     public void GenerateDailyQuests() 
     {
-        foreach (GameObject body in _questsBodies) 
+        foreach (GameObject body in _questVisuals) 
         {
             Destroy(body);
         }
-        _questsBodies = new HashSet<GameObject>();
+        _questVisuals = new HashSet<GameObject>();
 
-        HashSet<QuestTaskBody> todayQuests;
-        if (!_currentTasks.TryGetValue(GlobalDaySystem.Instance.DayNumber, out todayQuests))
-        {
-            todayQuests = new HashSet<QuestTaskBody>();
-        }
+        HashSet<Quest> todayQuests = new();
 
         for (int i = 0; i < UnityEngine.Random.Range(_dailyTaskCountRange.x, _dailyTaskCountRange.y + 1); i++) 
         {
-            QuestTaskBody task = GenerateQuest();
+            Quest task = GenerateQuest();
             
             todayQuests.Add(task);
+        }
+
+        _currentTasks.TryGetValue(GlobalDaySystem.Instance.DayNumber, out HashSet<Quest> todayTasks);
+        if (todayTasks != null) 
+        {
+            foreach (var task in todayTasks.ToList())
+            {
+                UncompleteTask(task);
+            }
         }
 
         UpdateAllTaskDeadline();
         DisplayQuests(todayQuests);
     }
 
-    public QuestTaskBody GenerateQuest() 
+    public Quest GenerateQuest() 
     {
-        QuestTaskBody sourse = _questDatabase[UnityEngine.Random.Range(0, _questDatabase.Length)];
-        QuestTaskBody task = Instantiate(sourse);
-        task.Deadline = UnityEngine.Random.Range(task.DeadlineRange.x, task.DeadlineRange.y + 1);
-        task.Reward = Mathf.Round(UnityEngine.Random.Range(task.RewardRange.x, task.RewardRange.y));
-        return task;
+        QuestBody source = _questBodyDatabase[UnityEngine.Random.Range(0, _questBodyDatabase.Length)];
+        QuestBody questBody = Instantiate(source);
+        int deadline = UnityEngine.Random.Range(questBody.DeadlineRange.x, questBody.DeadlineRange.y + 1);
+        int reward = UnityEngine.Random.Range(questBody.RewardRange.x, questBody.RewardRange.y);
+        CrystalType type = questBody.Types[UnityEngine.Random.Range(0, questBody.Types.Length)];
+        CrystalSize size = questBody.Sizes[UnityEngine.Random.Range(0, questBody.Sizes.Length)];
+        Quest quest = new(questBody, GameManager.GetRandomPersonName(), type, size, deadline, reward);
+        return quest;
     }
 
-    private void DisplayQuests(HashSet<QuestTaskBody> quests) 
+    private void DisplayQuests(HashSet<Quest> quests) 
     {
         foreach (var quest in quests)
         {
             DisplayQuestBody body = Instantiate(_questVisual, _questContentTransform).GetComponent<DisplayQuestBody>();
             body.Quest = quest;
             body.Display();
-            _questsBodies.Add(body.gameObject);
+            _questVisuals.Add(body.gameObject);
         }
     }
 
-    private void DisplayNewTask(QuestTaskBody task) 
+    private void DisplayNewTask(Quest task) 
     {
         DisplayTaskBody body = Instantiate(_taskVisual, _taskContentTransform).GetComponent<DisplayTaskBody>();
         body.Task = task;
+        body.Task.address = MailSystem.RegisterNewMail(body.GetComponent<IMailComponent>());
         body.Display();
-        _tasksBodies.Add(task, body.gameObject);
+        _taskVisuals.Add(task, body.gameObject);
     }
 
     private void DisplayAllTask() 
     {
-        foreach (var task in _tasksBodies.Values)
+        foreach (var task in _taskVisuals.Values)
         {
             task.GetComponent<DisplayTaskBody>().Display();
         }
@@ -109,27 +127,47 @@ public class QuestSystem : MonoBehaviour
 
     private void UpdateAllTaskDeadline() 
     {
-        foreach (var set in _currentTasks.Values)
-        {
-            foreach (var task in set)
+        _currentTasks = _currentTasks.ToDictionary(
+            pair => pair.Key,
+            pair => pair.Value.Select(q =>
             {
-                task.Deadline -= 1;
-            }
-        }
+                q.deadline -= 1; // мен€ем копию структуры
+                return q;        // возвращаем обновлЄнный Quest
+            }).ToHashSet()       // если значение словар€ Ч HashSet<Quest> (или .ToList(), если List<Quest>)
+        );
         DisplayAllTask();
     }
 
-    private void RemoveTask(QuestTaskBody task) 
+    private void RemoveTask(Quest task) 
     {
-        Destroy(_tasksBodies[task]);
+        if (!_taskVisuals.ContainsKey(task))
+        {
+            Debug.Log($" вест от {task.personName} не найден");
+            return;
+        }
+
+        Debug.Log($" вест от {task.personName} найден");
+
+        // ”дал€ем квест из того дн€ дедлайна, в который он был записан
+        foreach (var taskSet in _currentTasks.Values)
+        {
+            if (taskSet.Remove(task))
+            {
+                break; // Ќашли и удалили, выходим из цикла
+            }
+        }
+
+        Destroy(_taskVisuals[task]);
+        MailSystem.RemoveMail(task.address);
+        _taskVisuals.Remove(task);
     }
 
-    public void AcceptTask(QuestTaskBody task) 
+    public void AcceptTask(Quest task) 
     {
-        int deadlineDay = GlobalDaySystem.Instance.DayNumber + task.Deadline;
+        int deadlineDay = GlobalDaySystem.Instance.DayNumber + task.deadline;
         if (!_currentTasks.ContainsKey(deadlineDay))
         {
-            _currentTasks.Add(deadlineDay, new HashSet<QuestTaskBody>());
+            _currentTasks.Add(deadlineDay, new HashSet<Quest>());
         }
 
         _currentTasks[deadlineDay].Add(task);
@@ -142,16 +180,18 @@ public class QuestSystem : MonoBehaviour
         AddFamous(-1);
     }
 
-    public void CompleteTask(QuestTaskBody task) 
+    public void CompleteTask(Quest task) 
     {
-        _currentTasks[GlobalDaySystem.Instance.DayNumber].Remove(task);
+        WalletSystem.GetReward(task.reward);
+        _walletVisuals.text = WalletSystem.Wallet.ToString();
+        RemoveTask(task);
 
         AddFamous(1);
     }
 
-    public void UncompleteTask(QuestTaskBody task) 
+    public void UncompleteTask(Quest task) 
     {
-        _currentTasks[GlobalDaySystem.Instance.DayNumber].Remove(task);
+        RemoveTask(task);
 
         AddFamous(-2);
     }

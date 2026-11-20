@@ -17,6 +17,8 @@ public class GreenGroundCrystal : Crystal
     [SerializeField] private Vector2 _peakRatioRange;
     [SerializeField] private Vector2 _topWidthRatioRange;
 
+    protected override CrystalType GetMyType() => CrystalType.Zeglyak;
+
     protected override ShardParams[] CrystalCalculator(ref float seed)
     {
         int count = SeedOperations.RandomNumberFromSeed(ref seed, _countRange);

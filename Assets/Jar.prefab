@@ -226,7 +226,9 @@ MonoBehaviour:
   _pourSpeed: 10
   _pourRadius: 3
   _contentImage: {fileID: 5855583828990832682}
-  _startingPowders: []
+  _startingPowders:
+  - Type: 1
+    Amount: 100
 --- !u!58 &461085243555045194
 CircleCollider2D:
   m_ObjectHideFlags: 0

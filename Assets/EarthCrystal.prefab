@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 8003177225200725314}
   - component: {fileID: 5319683775316542089}
   - component: {fileID: 8482502288403219953}
+  - component: {fileID: 1410846367637281688}
   m_Layer: 0
   m_Name: EarthCrystal
   m_TagString: Untagged
@@ -201,3 +202,18 @@ CapsuleCollider2D:
   m_Offset: {x: 0, y: 0}
   m_Size: {x: 0.84037256, y: 0.84037256}
   m_Direction: 1
+--- !u!114 &1410846367637281688
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3372584849458481729}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 74c3518a6ca198b40906ba7b47a19654, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ObjectWithInfo
+  Info:
+  - None
+  - Small

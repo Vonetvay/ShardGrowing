@@ -45,6 +45,8 @@ public class BlueCrystal : Crystal
     [SerializeField] private Vector2 _slopeRatioRange;
     [SerializeField] private Vector2 _peakRatioRange;
 
+    protected override CrystalType GetMyType() => CrystalType.Galimit;
+
     private float GetUniformDirection(ref float seed, float[] points, float range, int sampleCount=10) 
     {
         if (points.Length == 0) 

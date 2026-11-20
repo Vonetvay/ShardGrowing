@@ -8,6 +8,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: -5716805635697463017, guid: 1573bcf1500773d4f89cc030aaec94b6, type: 3}
+      propertyPath: Info.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: -5716805635697463017, guid: 1573bcf1500773d4f89cc030aaec94b6, type: 3}
+      propertyPath: 'Info.Array.data[0]'
+      value: None
+      objectReference: {fileID: 0}
+    - target: {fileID: -5716805635697463017, guid: 1573bcf1500773d4f89cc030aaec94b6, type: 3}
+      propertyPath: 'Info.Array.data[1]'
+      value: Small
+      objectReference: {fileID: 0}
     - target: {fileID: 3310636679526490315, guid: 1573bcf1500773d4f89cc030aaec94b6, type: 3}
       propertyPath: m_Name
       value: GalinitCrystal
