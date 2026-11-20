@@ -16,6 +16,8 @@ GameObject:
   - component: {fileID: 5319683775316542089}
   - component: {fileID: 8482502288403219953}
   - component: {fileID: 1410846367637281688}
+  - component: {fileID: 892258182560743433}
+  - component: {fileID: 2437194488234258013}
   m_Layer: 0
   m_Name: EarthCrystal
   m_TagString: Untagged
@@ -217,3 +219,28 @@ MonoBehaviour:
   Info:
   - None
   - Small
+--- !u!114 &892258182560743433
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3372584849458481729}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e75bcd8904bbc2b47aa4f17945cf59ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SaveableEntity
+  id: 
+--- !u!114 &2437194488234258013
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3372584849458481729}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d7d9144a2a686d640ae65bb7a98d0c54, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SaveableTransform

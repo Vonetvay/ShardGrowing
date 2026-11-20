@@ -2,6 +2,8 @@ using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
 [RequireComponent(typeof(Collider2D))]
+[RequireComponent(typeof(SaveableEntity))]
+[RequireComponent(typeof(SaveableTransform))]
 public class Draggable : MonoBehaviour
 {
     private DraggableState _state;

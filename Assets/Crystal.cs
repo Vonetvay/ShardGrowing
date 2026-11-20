@@ -8,12 +8,19 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using static UnityEngine.Rendering.DebugUI;
 
+public enum CrystalState 
+{
+    Normal,
+    Growing,
+    Cracked
+}
+
 public record ShardParams(float3 Position, float4x4 BaseMatrix, float4x4 TransformMatrix, float ZOffset, float Delay, float Duration);
 
 [RequireComponent(typeof(CapsuleCollider2D))]
 [RequireComponent(typeof(Draggable))]
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer), typeof(ObjectWithInfo))]
-public class Crystal : MonoBehaviour, IInteractiveObject, IInteractWithTerrain, IPowderContainer
+public class Crystal : MonoBehaviour, IInteractiveObject, IInteractWithTerrain, IPowderContainer, ISaveable
 {
     [Header("Настройка анимации")]
     [SerializeField][Range(0f, 1f)] protected float _animationProgress;
@@ -81,14 +88,6 @@ public class Crystal : MonoBehaviour, IInteractiveObject, IInteractWithTerrain, 
         }
     }
 
-    public void OnValidate()
-    {
-        _owi = GetComponent<ObjectWithInfo>();
-        _animationProgress = Mathf.Round(_animationProgress / _animationStep) * _animationStep;
-        Size = ConvertAnimationProgressToSize(_animationProgress);
-        GenerateCrystal(_seed);
-    }
-
     protected virtual void Awake()
     {
         Init();
@@ -121,6 +120,11 @@ public class Crystal : MonoBehaviour, IInteractiveObject, IInteractWithTerrain, 
     private void SetNormalState() 
     {
         _material.SetFloat("_TextureAlpha", 1f);
+    }
+
+    private void SetGrowingState() 
+    {
+
     }
 
     public void SetCrackedState() 
@@ -198,6 +202,7 @@ public class Crystal : MonoBehaviour, IInteractiveObject, IInteractWithTerrain, 
     protected virtual void OnGrowthStart() 
     {
         _growing = true;
+        DragManager.Instance.EndDrag();
         _imNeedToFeed = true;
         _growthIndicator.SetActive(true);
         _amountBar.gameObject.SetActive(true);
@@ -377,5 +382,37 @@ public class Crystal : MonoBehaviour, IInteractiveObject, IInteractWithTerrain, 
     {
         if (!_canInteract || !_imNeedToFeed) return false;
         return _growthRecipe.Matches(mix.GetComponentsInShares(), 20f, ProcessType.Crystallization);
+    }
+
+    private struct CrystalSaveData
+    {
+        public float animationProgress;
+        public float seed;
+        public bool growing;
+        public bool canInteractive;
+    }
+
+    public string CaptureState()
+    {
+        var data = new CrystalSaveData
+        {
+            animationProgress = _animationProgress,
+            seed = _seed,
+            growing = _growing,
+            canInteractive = _canInteract
+        };
+        return JsonUtility.ToJson(data);
+    }
+
+    public void RestoreState(string jsonState)
+    {
+        var data = JsonUtility.FromJson<CrystalSaveData>(jsonState);
+
+        _animationProgress = data.animationProgress;
+        _seed = data.seed;
+        _growing = data.growing;
+        _canInteract = data.canInteractive;
+        if (_growing) OnGrowthStart();
+        GenerateCrystal(_seed);
     }
 }

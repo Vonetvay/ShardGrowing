@@ -16,6 +16,8 @@ GameObject:
   - component: {fileID: 4964414670410931438}
   - component: {fileID: 3795984671706089943}
   - component: {fileID: 7469645670332463835}
+  - component: {fileID: 8525331098418689480}
+  - component: {fileID: 5193110838368829187}
   m_Layer: 0
   m_Name: GreenGroundCrystal
   m_TagString: Untagged
@@ -243,3 +245,28 @@ MonoBehaviour:
   Info:
   - None
   - Small
+--- !u!114 &8525331098418689480
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6516520970810110874}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e75bcd8904bbc2b47aa4f17945cf59ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SaveableEntity
+  id: 
+--- !u!114 &5193110838368829187
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6516520970810110874}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d7d9144a2a686d640ae65bb7a98d0c54, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SaveableTransform

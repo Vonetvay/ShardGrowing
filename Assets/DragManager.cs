@@ -15,9 +15,16 @@ public class DragManager : MonoBehaviour
 
     public GameObject CurrentDraggedObject => _currentDraggedObject;
 
+    public static DragManager Instance;
+
     private void Awake()
     {
         _defaultLayer = gameObject.layer;
+
+        if (Instance == null) 
+        {
+            Instance = this;
+        }
     }
 
     private void Start()
@@ -182,7 +189,7 @@ public class DragManager : MonoBehaviour
         _currentDraggedObject.transform.position = new Vector3(newPosition.x, newPosition.y, currentZ);
     }
 
-    private void EndDrag()
+    public void EndDrag()
     {
         _currentDraggedObject.GetComponent<Draggable>().SetState(new DraggableFreeState());
         isDragging = false;

@@ -6,7 +6,8 @@ public static class GameManager
 
     private static string[] s_personNames = {
         "William", "Nikita", "Ebub", "Gray magle", "Edward",
-        "Bro", "54 person", "Stranger person", "Magica magle"
+        "Bro", "54 person", "Stranger person", "Magica magle",
+        "Jack",
     };
 
     public static string GetRandomPersonName() 

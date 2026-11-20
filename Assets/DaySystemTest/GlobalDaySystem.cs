@@ -19,6 +19,11 @@ public class GlobalDaySystem : MonoBehaviour
         }
     }
 
+    private void Start()
+    {
+        SaveManager.Instance.LoadGame();
+    }
+
     public void ToNext() 
     {
         DayNumber++;
@@ -38,6 +43,8 @@ public class GlobalDaySystem : MonoBehaviour
         {
             item.TryGrowthUp();
         }
+
+        SaveManager.Instance.SaveGame();
 
         yield return null;
     }

@@ -4,7 +4,7 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 
-public struct Quest 
+public class Quest 
 {
     public Quest(QuestBody body,string personName, CrystalType type, CrystalSize size, int deadline, int reward, int address=0) 
     {
@@ -114,7 +114,7 @@ public class QuestSystem : MonoBehaviour
         body.Task = task;
         body.Task.address = MailSystem.RegisterNewMail(body.GetComponent<IMailComponent>());
         body.Display();
-        _taskVisuals.Add(task, body.gameObject);
+        _taskVisuals.Add(body.Task, body.gameObject);
     }
 
     private void DisplayAllTask() 
@@ -135,6 +135,7 @@ public class QuestSystem : MonoBehaviour
                 return q;        // возвращаем обновлЄнный Quest
             }).ToHashSet()       // если значение словар€ Ч HashSet<Quest> (или .ToList(), если List<Quest>)
         );
+
         DisplayAllTask();
     }
 
@@ -183,7 +184,6 @@ public class QuestSystem : MonoBehaviour
     public void CompleteTask(Quest task) 
     {
         WalletSystem.GetReward(task.reward);
-        _walletVisuals.text = WalletSystem.Wallet.ToString();
         RemoveTask(task);
 
         AddFamous(1);
