@@ -26,7 +26,7 @@ public class Quest
     public int address;
 }
 
-public class QuestSystem : MonoBehaviour
+public class QuestSystem : MonoBehaviour, ISaveable
 {
     public QuestBody[] _questBodyDatabase;
     private Dictionary<int, HashSet<Quest>> _currentTasks = new();
@@ -200,5 +200,27 @@ public class QuestSystem : MonoBehaviour
     {
         Famous += count;
         _famousCounter.text = Famous.ToString();
+    }
+
+    public struct QuestSystemData 
+    {
+        public float famous;
+    }
+
+    public string CaptureState()
+    {
+        QuestSystemData data = new()
+        {
+            famous = Famous
+        };
+
+        return JsonUtility.ToJson(data);
+    }
+
+    public void RestoreState(string jsonState)
+    {
+        var data = JsonUtility.FromJson<QuestSystemData>(jsonState);
+
+        Famous = data.famous;
     }
 }

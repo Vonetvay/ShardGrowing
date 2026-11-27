@@ -11,7 +11,7 @@ public class SaveManager : MonoBehaviour
 
     private void Awake()
     {
-        if (Instance == null) 
+        if (Instance == null)
         {
             Instance = this;
         }
@@ -76,4 +76,18 @@ public class SaveManager : MonoBehaviour
         Physics.SyncTransforms();
         Debug.Log("Игра загружена.");
     }
+
+    public void ClearSave()
+    {
+        if (File.Exists(SavePath))
+        {
+            File.Delete(SavePath);
+            Debug.Log("Сохранение удалено.");
+        }
+        else
+        {
+            Debug.LogWarning("Файл сохранения не найден для удаления.");
+        }
+    }
+
 }

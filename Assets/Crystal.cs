@@ -8,12 +8,12 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using static UnityEngine.Rendering.DebugUI;
 
-public enum CrystalState 
+/*public enum CrystalState 
 {
     Normal,
     Growing,
     Cracked
-}
+}*/
 
 public record ShardParams(float3 Position, float4x4 BaseMatrix, float4x4 TransformMatrix, float ZOffset, float Delay, float Duration);
 
@@ -22,51 +22,55 @@ public record ShardParams(float3 Position, float4x4 BaseMatrix, float4x4 Transfo
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer), typeof(ObjectWithInfo))]
 public class Crystal : MonoBehaviour, IInteractiveObject, IInteractWithTerrain, IPowderContainer, ISaveable
 {
-    [Header("Настройка анимации")]
+    [Header("Настройка роста")]
     [SerializeField][Range(0f, 1f)] protected float _animationProgress;
     public float AnimationProgress => _animationProgress;
-    [SerializeField] private float _animationStep = 0.1f;
-
-    [SerializeField] private int _growthDuration = 5;
     [SerializeField] private float _shardAnimationProgress = 0.1f;
+    [SerializeField] private int _growthDuration = 5;
+    [SerializeField] private float _growthUpAmount;
+    [HideInInspector] public float GrowthUpAmountCurrent = 0f;
 
+    [SerializeField] private FeedComposition _feedComposition;
+
+    [SerializeField] private bool _debugMode;
+    [ShowIf(nameof(_debugMode))]
+    [SerializeField] private float _animationStep = 0.1f;
+    
     [Header("Настройка кристалла")]
     [SerializeField] protected int vertexCount = 4;
     [SerializeField] private float _seed;
-    [SerializeField] private float _size;
-    [SerializeField] private float _density;
+    [SerializeField] private float _visualScale;
 
-    [SerializeField] private GrowthRecipe _growthRecipe;
-    [SerializeField] private float _growthUpAmount;
-    private float _growthUpAmountCurrent = 0f;
-    [SerializeField] private Image _amountBar;
+    //[SerializeField] private GrowthRecipe _growthRecipe;
 
     [Header("Шейдеры")]
     [SerializeField] private Shader _shader;
-    [SerializeField] private Material _material;
+    [HideInInspector] public Material Material;
     [SerializeField] private Texture2D _crackedTex;
+    private Mesh mesh;
+
+    [Header("UI")]
+
+    [SerializeField] public GameObject GrowthIndicator;
+    [SerializeField] public Image AmountBar;
+    [SerializeField] public GameObject Particles;
+
     private MeshRenderer _meshRenderer;
-
     private CapsuleCollider2D _collider;
-    private Draggable _draggable;
-
-    private bool _imNeedToFeed = false;
-
-    private bool _growing = false;
-    public bool Growing => _growing;
-
-    private bool _canInteract = true;
-
-    [SerializeField] private GameObject _growthIndicator;
-
+    [HideInInspector] public Draggable Draggable;
     protected ObjectWithInfo _owi;
 
-    public CrystalType Type { get; protected set; }
-    public CrystalSize Size { get; private set; }
+    private CrystalState _state = new CrystalStateNormal();
+    [HideInInspector] public CrystalState State => _state;
+
+    [HideInInspector] public bool CanInteract = true;
+
+    [HideInInspector] public CrystalType Type { get; protected set; }
+    [HideInInspector] public CrystalSize Size { get; private set; }
 
     public void Interact(GameObject draggedObject)
     {
-        if (!_canInteract) return;
+        if (!CanInteract) return;
         /*if (draggedObject.TryGetComponent<IPowderContainerDynamic>(out IPowderContainerDynamic handContainer))
         {
             PowderComposition givenComposition = handContainer.GivePowderPortion(_growthUpAmount);
@@ -82,7 +86,7 @@ public class Crystal : MonoBehaviour, IInteractiveObject, IInteractWithTerrain, 
         }*/
         else if (draggedObject.TryGetComponent<Shovel>(out Shovel shovel))
         {
-            OnGrowthEnd();
+            SetState(new CrystalStateNormal());
             
             Debug.Log("Кристалл посажен");
         }
@@ -98,7 +102,8 @@ public class Crystal : MonoBehaviour, IInteractiveObject, IInteractWithTerrain, 
         _owi.Info = new List<string>
         {
             $"{Type}",
-            $"{Size}"
+            $"{Size}",
+            _state.GetType().Name
         };
     }
 
@@ -112,56 +117,46 @@ public class Crystal : MonoBehaviour, IInteractiveObject, IInteractWithTerrain, 
 
     private void InitMaterial() 
     {
-        _material = new Material(_shader);
-        _meshRenderer.material = _material;
-        _material.SetTexture("_BaseMap", _crackedTex);
-    }
-
-    private void SetNormalState() 
-    {
-        _material.SetFloat("_TextureAlpha", 1f);
-    }
-
-    private void SetGrowingState() 
-    {
-
-    }
-
-    public void SetCrackedState() 
-    {
-        _material.SetFloat("_TextureAlpha", 0f);
-        _canInteract = false;
-        _draggable.SetState(new DraggableUnlockedState());
-        OnGrowthEnd();
+        Destroy(Material);
+        Material = new Material(_shader);
+        
+        _meshRenderer.material = Material;
+        Material.SetTexture("_BaseMap", _crackedTex);
     }
 
     public void TryGrowthUp() 
     {
-        if (!_growing) return;
-        if (!_imNeedToFeed)
+        switch (_state) 
         {
-            SetNormalState();
-            GrowthUp();
-        }
-        else 
-        {
-            SetCrackedState();
-            Debug.Log("Кристалл треснул");
+            case CrystalStateFed:
+                SetState(new CrystalStateGrowing());
+                GrowthUp();
+                break;
+            case CrystalStateGrowing:
+                SetState(new CrystalStateCracked());
+                Debug.Log("Кристалл треснул");
+                break;
+            default:
+                break;
         }
     }
 
     [Button("Вырасти")]
     private void GrowthUp() 
     {
-        if (_animationProgress == 1f) return;
+        float _deltaProgress = (1f - _shardAnimationProgress) / _growthDuration;
 
-        _animationProgress += (1f - _shardAnimationProgress) / _growthDuration;
+        if (_animationProgress + _deltaProgress >= 1f)
+        {
+            _animationProgress = 1f;
+            SetState(new CrystalStateCompleted());
+        }
+        else 
+        {
+            _animationProgress += _deltaProgress;
+            SetState(new CrystalStateGrowing());
+        }
         
-        if (_animationProgress >= 1f) _animationProgress = 1f;
-
-        _imNeedToFeed = true;
-        _canInteract = true;
-        _growthUpAmountCurrent = 0f;
         Size = ConvertAnimationProgressToSize(_animationProgress);
         UpdateFeedAmountBar();
 
@@ -184,37 +179,20 @@ public class Crystal : MonoBehaviour, IInteractiveObject, IInteractWithTerrain, 
         {
             if (item.TryGetComponent<Crystal>(out Crystal crystal)) 
             {
-                if (crystal.Growing) 
+                if (crystal == this) continue;
+                if (crystal.State is CrystalStateGrowing) 
                 {
                     if (crystal.AnimationProgress > _animationProgress)
                     {
-                        SetCrackedState();
+                        SetState(new CrystalStateCracked());
                     }
                     else 
                     {
-                        crystal.SetCrackedState();
+                        crystal.SetState(new CrystalStateCracked());
                     }
                 }
             }
         }
-    }
-
-    protected virtual void OnGrowthStart() 
-    {
-        _growing = true;
-        DragManager.Instance.EndDrag();
-        _imNeedToFeed = true;
-        _growthIndicator.SetActive(true);
-        _amountBar.gameObject.SetActive(true);
-        _draggable.SetState(new DraggableLockedState());
-    }
-
-    protected virtual void OnGrowthEnd() 
-    {
-        _growing = false;
-        _growthIndicator.SetActive(false);
-        _amountBar.gameObject.SetActive(false);
-        _draggable.SetState(new DraggableUnlockedState());
     }
 
     [Button("Вернуться к состоянию осколка")]
@@ -233,7 +211,7 @@ public class Crystal : MonoBehaviour, IInteractiveObject, IInteractWithTerrain, 
         Size = CrystalSize.Shard;
         _meshRenderer = GetComponent<MeshRenderer>();
         _collider = GetComponent<CapsuleCollider2D>();
-        _draggable = GetComponent<Draggable>();
+        Draggable = GetComponent<Draggable>();
         _owi = GetComponent<ObjectWithInfo>();
         InitMaterial();
         GenerateCrystal(_seed);
@@ -243,12 +221,11 @@ public class Crystal : MonoBehaviour, IInteractiveObject, IInteractWithTerrain, 
 
     public float GenerateCrystal(float seed)
     {
-        _collider = GetComponent<CapsuleCollider2D>();
-
         int triangleCount = vertexCount * 3 - 6;
         MeshFilter meshFilter = GetComponent<MeshFilter>();
 
-        Mesh mesh = new() { name = "ProceduralCrystal" };
+        if (mesh != null) mesh.Clear();
+        mesh = new() { name = "ProceduralCrystal" };
 
         float currentSeed = seed;
         SeedOperations.RandomNumberFromSeed(ref currentSeed, 0f, 1f);
@@ -274,11 +251,11 @@ public class Crystal : MonoBehaviour, IInteractiveObject, IInteractWithTerrain, 
             ShardCalculator(i, vertexCount, vertexSlice, triangleSlice, uvSlice, shardsParams[i]);
         }
 
-        if (_size > 1)
+        if (_visualScale != 1)
         {
             for (int i = 0; i < vertices.Length; i++) 
             {
-                vertices[i] *= _size;
+                vertices[i] *= _visualScale;
             }
         }
 
@@ -345,24 +322,23 @@ public class Crystal : MonoBehaviour, IInteractiveObject, IInteractWithTerrain, 
 
     public void TerrainInteract(TerrainManager terrain, int cx, int cy)
     {
-        if (!_canInteract) return;
+        if (!CanInteract) return;
 
         TerrainType type = TerrainManager.Instance.GetTerrainFromCoord(cx, cy);
         Debug.Log(type.ToString());
         if (type == TerrainType.Field) 
         {
-            OnGrowthStart();
+            SetState(new CrystalStateGrowing());
         }
     }
 
     public float ReceivePowder(PowderComposition mix)
     {
         float addingAmount = mix.GetTotalAmount();
-        _growthUpAmountCurrent += addingAmount;
-        if (_growthUpAmountCurrent >= _growthUpAmount - .01f) 
+        GrowthUpAmountCurrent += addingAmount;
+        if (GrowthUpAmountCurrent >= _growthUpAmount - .01f) 
         {
-            _imNeedToFeed = false;
-            _canInteract = false;
+            SetState(new CrystalStateFed());
         }
         UpdateFeedAmountBar();
         return addingAmount;
@@ -370,25 +346,26 @@ public class Crystal : MonoBehaviour, IInteractiveObject, IInteractWithTerrain, 
 
     private void UpdateFeedAmountBar() 
     {
-        _amountBar.fillAmount = _growthUpAmountCurrent / _growthUpAmount;
+        AmountBar.fillAmount = GrowthUpAmountCurrent / _growthUpAmount;
     }
 
     public float GetAvailableSpace()
     {
-        return _growthUpAmount - _growthUpAmountCurrent;
+        return _growthUpAmount - GrowthUpAmountCurrent;
     }
 
     public bool CanIGetMixType(PowderComposition mix)
     {
-        if (!_canInteract || !_imNeedToFeed) return false;
-        return _growthRecipe.Matches(mix.GetComponentsInShares(), 20f, ProcessType.Crystallization);
+        if (!(_state is CrystalStateGrowing or CrystalStateFed)) return false;
+        return mix.Match(_feedComposition);
+        //return _growthRecipe.Matches(mix.GetComponentsInShares(), 20f, ProcessType.Crystallization);
     }
 
     private struct CrystalSaveData
     {
         public float animationProgress;
         public float seed;
-        public bool growing;
+        public string stateName;
         public bool canInteractive;
     }
 
@@ -398,8 +375,8 @@ public class Crystal : MonoBehaviour, IInteractiveObject, IInteractWithTerrain, 
         {
             animationProgress = _animationProgress,
             seed = _seed,
-            growing = _growing,
-            canInteractive = _canInteract
+            stateName = _state != null ? _state.GetType().Name : nameof(CrystalStateNormal),
+            canInteractive = CanInteract,
         };
         return JsonUtility.ToJson(data);
     }
@@ -410,9 +387,151 @@ public class Crystal : MonoBehaviour, IInteractiveObject, IInteractWithTerrain, 
 
         _animationProgress = data.animationProgress;
         _seed = data.seed;
-        _growing = data.growing;
-        _canInteract = data.canInteractive;
-        if (_growing) OnGrowthStart();
+
+        // Воссоздаём нужный класс состояния по имени
+        CrystalState loadedState = data.stateName switch
+        {
+            nameof(CrystalStateNormal) => new CrystalStateNormal(),
+            nameof(CrystalStateGrowing) => new CrystalStateGrowing(),
+            nameof(CrystalStateFed) => new CrystalStateFed(),
+            nameof(CrystalStateCracked) => new CrystalStateCracked(),
+            nameof(CrystalStateCompleted) => new CrystalStateCompleted(),
+            _ => new CrystalStateNormal()
+        };
+
+        // Принудительно применяем состояние без проверки CanTransitionTo
+        ForceSetState(loadedState);
+
+        // Восстанавливаем интерактивность поверх состояния, если она менялась отдельно
+        CanInteract = data.canInteractive;
+
+        Size = ConvertAnimationProgressToSize(_animationProgress);
+        UpdateFeedAmountBar();
         GenerateCrystal(_seed);
+    }
+
+
+    public bool SetState(CrystalState newState)
+    {
+        if (newState == null || newState.GetType() == _state.GetType()) return false;
+
+        if (_state == null || _state.CanTransitionTo(newState))
+        {
+            ForceSetState(newState);
+            return true;
+        }
+
+        return false;
+    }
+
+    private void ForceSetState(CrystalState newState)
+    {
+        _state = newState;
+        _state.Init(this);
+        _state.Enter();
+        UpdateObjectInfo();
+    }
+}
+
+public abstract class CrystalState
+{
+    protected Crystal crystal;
+
+    public void Init(Crystal crystal)
+    {
+        this.crystal = crystal;
+    }
+
+    public virtual void Enter()
+    {
+        
+    }
+
+    public virtual bool CanTransitionTo(CrystalState state)
+    {
+        throw new NotImplementedException();
+    }
+}
+
+public class CrystalStateNormal : CrystalState 
+{
+    public override void Enter()
+    {
+        crystal.GrowthIndicator.SetActive(false);
+        crystal.AmountBar.gameObject.SetActive(false);
+        crystal.Draggable.SetState(new DraggableUnlockedState());
+        crystal.Particles.SetActive(false);
+    }
+
+    public override bool CanTransitionTo(CrystalState state)
+    {
+        return state is CrystalStateGrowing;
+    }
+}
+
+public class CrystalStateGrowing : CrystalState
+{
+
+    public override void Enter()
+    {
+        crystal.GrowthIndicator.SetActive(true);
+        crystal.AmountBar.gameObject.SetActive(true);
+        crystal.Draggable.SetState(new DraggableLockedState());
+        crystal.GrowthUpAmountCurrent = 0f;
+        crystal.Particles.SetActive(false);
+    }
+
+    public override bool CanTransitionTo(CrystalState state)
+    {
+        return state is CrystalStateNormal or CrystalStateFed or CrystalStateCracked or CrystalStateCompleted;
+    }
+}
+
+public class CrystalStateFed : CrystalState
+{
+    public override void Enter()
+    {
+        crystal.CanInteract = false;
+        crystal.Particles.SetActive(true);
+    }
+
+    public override bool CanTransitionTo(CrystalState state)
+    {
+        return state is CrystalStateGrowing or CrystalStateNormal or CrystalStateCracked;
+    }
+}
+
+public class CrystalStateCracked : CrystalState
+{
+
+    public override void Enter()
+    {
+        crystal.Material.SetFloat("_TextureAlpha", 0f);
+        crystal.CanInteract = false;
+        crystal.Draggable.SetState(new DraggableUnlockedState());
+        crystal.CanInteract = false;
+        crystal.Particles.SetActive(false);
+    }
+
+    public override bool CanTransitionTo(CrystalState state)
+    {
+        return state is CrystalStateGrowing;
+    }
+}
+
+public class CrystalStateCompleted : CrystalState 
+{
+    public override void Enter()
+    {
+        crystal.GrowthIndicator.SetActive(false);
+        crystal.AmountBar.gameObject.SetActive(false);
+        crystal.Draggable.SetState(new DraggableUnlockedState());
+        crystal.CanInteract = false;
+        crystal.Particles.SetActive(true);
+    }
+
+    public override bool CanTransitionTo(CrystalState state)
+    {
+        return false;
     }
 }

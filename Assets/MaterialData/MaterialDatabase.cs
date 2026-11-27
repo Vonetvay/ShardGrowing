@@ -92,6 +92,26 @@ public struct PowderComposition
         return new PowderComposition(newPowders);
     }
 
+    public bool Match(FeedComposition mix) 
+    {
+        Dictionary<MaterialType, float> shares = GetComponentsInShares();
+        foreach (var item in mix.Components) 
+        {
+            if (shares.TryGetValue(item.Type, out float s))
+            {
+                if (item.Share.x > s || item.Share.y < s) 
+                {
+                    return false;
+                }
+            }
+            else 
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public PowderComposition Subtract(float amountToRemove)
     {
         if (amountToRemove < 0)

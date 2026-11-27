@@ -1,7 +1,7 @@
 using TMPro;
 using UnityEngine;
 
-public class WalletSystem : MonoBehaviour
+public class WalletSystem : MonoBehaviour, ISaveable
 {
     [SerializeField] private int _startingSum;
     [SerializeField] private TextMeshProUGUI _walletVisual;
@@ -15,15 +15,21 @@ public class WalletSystem : MonoBehaviour
         Wallet = _startingSum;
     }
 
-    public static void GetReward(int count) 
+    public static void GetReward(int count)
     {
         Wallet += count;
         UpdateVisual();
     }
 
-    public static bool TryBuyItem(int cost) 
+    public static void ResetWallet() 
     {
-        if (Wallet < cost) 
+        Wallet = 0;
+        UpdateVisual();
+    }
+
+    public static bool TryBuyItem(int cost)
+    {
+        if (Wallet < cost)
         {
             return false;
         }
@@ -32,8 +38,30 @@ public class WalletSystem : MonoBehaviour
         return true;
     }
 
-    private static void UpdateVisual() 
+    private static void UpdateVisual()
     {
         s_walletVisual.text = Wallet.ToString();
+    }
+
+    public struct WalletSystemData 
+    {
+        public int wallet;
+    }
+
+    public string CaptureState()
+    {
+        WalletSystemData data = new()
+        {
+            wallet = Wallet,
+        };
+
+        return JsonUtility.ToJson(Wallet);
+    }
+
+    public void RestoreState(string jsonState)
+    {
+        var data = JsonUtility.FromJson<WalletSystemData>(jsonState);
+
+        Wallet = data.wallet;
     }
 }
